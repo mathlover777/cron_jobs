@@ -1,0 +1,77 @@
+import requests
+import json
+import helper
+
+planck_hard_pass = 'planck_test'
+base_url = 'http://token-store-dev.elasticbeanstalk.com'
+
+
+def get_token(email_id):
+	payload = {'email_id':email_id,'access_token':'planck_test'}
+	url = base_url + '/server/get_token'
+	r = requests.post(url,data = payload)
+	response = r.json()
+	# print response
+	if response['success'] != 'true':
+		print 'error'
+		return ''
+	return response['token']
+
+def get_email_prio_users():
+	r = requests.post(base_url + '/server/get_priority_user_list')
+	response = r.json()
+	if (response['success'] != 'true'):
+		print 'error !!'
+		return []	
+	return response['prio_user_list']
+
+def update_contact_score(email_id,contact_score_json):
+	# str_score = {}
+	# for email in contact_score_json:
+	# 	str_score[email.encode('ascii','ignore')] = contact_score_json[email]
+	# print str_score
+	payload = {'email_id':email_id,'contact_score_json':json.dumps(contact_score_json)}
+	url = base_url + '/server/update_contact_score'
+	r = requests.post(url,data = payload)
+	response = r.json()
+	print response
+	return
+
+def get_contact_score_list(email_id,contact_list):
+	contact_list = map(lambda x:x.encode('ascii','ignore').lower(),contact_list)
+	contact_list_string = ','.join(  map(   lambda x:str(x.encode('ascii','encode')) ,  contact_list )         )
+	payload = {'email_id':email_id,'email_id_list':contact_list_string}
+	url = base_url + '/server/get_contact_score_list'
+	r = requests.post(url,data = payload)
+	response = r.json()
+	score_dict = {}
+	for contact_email_id in contact_list:
+		score_dict[contact_email_id] = 0.0
+	if response['success'] != 'true':
+		return score_dict
+	for contact_email_id in contact_list:
+		score_dict[contact_email_id] = response[contact_email_id]
+	return score_dict
+
+def get_last_updated_time_stamp(email_id):
+	payload = {'email_id':email_id}
+	url = base_url + '/server/get_last_updated_time_stamp'
+	r = requests.post(url,data = payload)
+	response = r.json()
+	print response
+	if response['success'] != 'true':
+		print response
+		return helper.get_old_time_stamp_by_minute(60)
+	return int(response['time_stamp'])
+
+def set_last_updated_time_stamp(email_id,time_stamp):
+	payload = {'email_id':email_id,'last_updated_time':time_stamp}
+	url = base_url + '/server/set_last_updated_time_stamp'
+	r = requests.post(url,data = payload)
+	response = r.json()
+	if response['success'] != 'true':
+		print 'unable to update !'
+		print response
+	else:
+		print 'update successful'
+	return int(response['now_time'])
