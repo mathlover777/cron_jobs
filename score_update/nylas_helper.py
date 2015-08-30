@@ -18,6 +18,8 @@ def get_msg_count_in_range(future_time_stamp,past_time_stamp,email,token,directi
 	# 	'last_message_after' : past_time_stamp})
 	message_list = client.messages.where(**{direction:email,'last_message_before' : future_time_stamp,\
 		'last_message_after' : past_time_stamp})
+	print future_time_stamp,time.strftime("%D %H:%M", time.localtime(int(future_time_stamp)))
+	print past_time_stamp,time.strftime("%D %H:%M", time.localtime(int(past_time_stamp)))
 	sent_people_stat = {}
 	for message in message_list:
 		for sent_address in message['to']:
@@ -71,7 +73,10 @@ def get_msg_score(email,token):
 	unseen_stat = [None] * upto_weeks
 	for i in xrange(0,upto_weeks):
 		print 'i = ',i
-		future_time_stamp = helper.get_old_time_stamp(i*7)
+		if i == 0:
+			future_time_stamp = helper.get_current_time_stamp()
+		else:
+			future_time_stamp = helper.get_old_time_stamp(i*7)
 		past_time_stamp = helper.get_old_time_stamp((i+1) * 7)
 		sent_stat[i] = get_msg_count_in_range(future_time_stamp,past_time_stamp,email,token,'from')
 		print 'sent_stat'
