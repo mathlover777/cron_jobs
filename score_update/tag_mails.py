@@ -14,12 +14,12 @@ def tag_new_mails_for_all_users():
 	for email_id in user_list:
 		try:
 			tag_new_mails(email_id)
-		except:
-			print 'tagger crashed for ' + email_id
+		except Exception as e:
+			print 'tagger crashed for ' + email_id + ' Exception : {' + str(e) + '}'
 	return
 while True:
 	try:
 		tag_new_mails_for_all_users()
-	except:
-		print 'tagger crashed'
+	except Exception as e:
+		print 'tagger crashed' + ' Exception : {' + str(e) + '}'
 	time.sleep(60)
