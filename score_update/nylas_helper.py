@@ -14,7 +14,9 @@ APP_SECRET = '8fokx1yoht10ypwdgev3rqqlp'
 
 def get_msg_count_in_range(future_time_stamp,past_time_stamp,email,token,direction):
 	client = nylas.APIClient(APP_ID, APP_SECRET, token)
-	message_list = client.namespaces[0].messages.where(**{direction:email,'last_message_before' : future_time_stamp,\
+	# message_list = client.namespaces[0].messages.where(**{direction:email,'last_message_before' : future_time_stamp,\
+	# 	'last_message_after' : past_time_stamp})
+	message_list = client.messages.where(**{direction:email,'last_message_before' : future_time_stamp,\
 		'last_message_after' : past_time_stamp})
 	sent_people_stat = {}
 	for message in message_list:
@@ -31,7 +33,10 @@ def get_msg_count_in_range(future_time_stamp,past_time_stamp,email,token,directi
 
 def get_thread_participant_score_with_tags(future_time_stamp,past_time_stamp,token,tag,self_email):
 	client = nylas.APIClient(APP_ID, APP_SECRET, token)
-	thread_list = client.namespaces[0].threads.where(**{'tag':tag,'last_message_before' : future_time_stamp,\
+	# thread_list = client.namespaces[0].threads.where(**{'tag':tag,'last_message_before' : future_time_stamp,\
+	# 	'last_message_after' : past_time_stamp})
+
+	thread_list = client.threads.where(**{'tag':tag,'last_message_before' : future_time_stamp,\
 		'last_message_after' : past_time_stamp})
 
 	exp_count = 0
