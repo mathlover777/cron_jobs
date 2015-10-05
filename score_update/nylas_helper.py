@@ -193,15 +193,33 @@ def use_labels(email_id):
 		return True
 	return False
 
-def tag_thread_given_condition(thread,label_flag,id_remove,id_add):
+def tag_thread_given_condition(thread,label_flag,id_remove,id_add,score,boolean_flags):
 	if label_flag:
 		# use labels
 		thread.remove_label(id_remove)
 		thread.add_label(id_add)
 	else:
 		# use folder
+		if score > 0 or boolean_flags:
+			return
 		thread.update_folder(id_add)
 	return
+
+def is_white_listed_mail(subject_line):
+	white_list = ["Important","Urgent","Reset Password","Upcoming payment",\
+		"Registration","Register","Action item","Sign-in","Receipt","Return","Refund",\
+		"Itinerary","Bank transfer","Invoice","Shipment","Confirmation","Activation",\
+		"Contract","Password"]
+	normalized_white_list_set = set([x.lower().strip() for x in white_list])
+
+	for word in normalized_white_list_set:
+		p = re.compile(word)
+		if re.search(p,subject_line) is not None:
+			return True
+
+	return False
+
+
 
 def tag_unread_mails_in_time_range(email_id,token,now_time,old_time):
 	client = nylas.APIClient(APP_ID, APP_SECRET, token)
@@ -218,6 +236,8 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time):
 	
 	score_dict = token_store.get_contact_score_list(email_id,list(request_set))
 	
+
+
 	if use_labels(email_id):
 		read_now_id = get_id(ns,'Read Now')
 		read_later_id = get_id(ns,'Read Later')
@@ -227,20 +247,21 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time):
 		read_later_id = get_folder_id(ns,'Read Later')
 		label_flag = False
 
+
+
 	# print score_dict
 	for thread in recent_threads:
+		white_list_flag = is_white_listed_mail(thread['subject'])
 		plist = get_other_participants_in_thread(thread,email_id)
 		score = 0.0
 		for participant in plist:
 			score += score_dict[participant.encode('ascii','ignore').lower()]
-		if score > 0:
-			tag_thread_given_condition(thread,label_flag,read_later_id,read_now_id)
-			# thread.remove_label(read_later_id)
-			# thread.add_label(read_now_id)
+
+		boolean_flags = white_list_flag
+		if score > 0 or boolean_flags:
+			tag_thread_given_condition(thread,label_flag,read_later_id,read_now_id,score,boolean_flags)
 		else:
-			tag_thread_given_condition(thread,label_flag,read_now_id,read_later_id)
-			# thread.remove_label(read_now_id)
-			# thread.add_label(read_later_id)
+			tag_thread_given_condition(thread,label_flag,read_now_id,read_later_id,score,boolean_flags)
 	return
 
 def tag_recent_unread_mails(email_id,token):
