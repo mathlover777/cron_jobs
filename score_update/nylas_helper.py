@@ -18,8 +18,8 @@ def get_msg_count_in_range(future_time_stamp,past_time_stamp,email,token,directi
 	# 	'last_message_after' : past_time_stamp})
 	message_list = client.messages.where(**{direction:email,'last_message_before' : future_time_stamp,\
 		'last_message_after' : past_time_stamp})
-	print future_time_stamp,time.strftime("%D %H:%M", time.localtime(int(future_time_stamp)))
-	print past_time_stamp,time.strftime("%D %H:%M", time.localtime(int(past_time_stamp)))
+	# print future_time_stamp,time.strftime("%D %H:%M", time.localtime(int(future_time_stamp)))
+	# print past_time_stamp,time.strftime("%D %H:%M", time.localtime(int(past_time_stamp)))
 	sent_people_stat = {}
 	for message in message_list:
 		for sent_address in message['to']:
@@ -33,13 +33,18 @@ def get_msg_count_in_range(future_time_stamp,past_time_stamp,email,token,directi
 	return sent_people_stat
 
 
+
+
 def get_thread_participant_score_with_tags(future_time_stamp,past_time_stamp,token,tag,self_email):
 	client = nylas.APIClient(APP_ID, APP_SECRET, token)
 	# thread_list = client.namespaces[0].threads.where(**{'tag':tag,'last_message_before' : future_time_stamp,\
 	# 	'last_message_after' : past_time_stamp})
 
-	thread_list = client.threads.where(**{'tag':tag,'last_message_before' : future_time_stamp,\
-		'last_message_after' : past_time_stamp})
+	# thread_list = client.threads.where(**{'tag':tag,'last_message_before' : future_time_stamp,\
+	# 	'last_message_after' : past_time_stamp})  # depreciated tags api
+
+	thread_list = client.threads.where(**{tag:True,'last_message_before' : future_time_stamp,\
+		'last_message_after' : past_time_stamp}) # here we are directly using "high level flags" inspead of tags
 
 	exp_count = 0
 	nexp_count = 0
@@ -57,8 +62,8 @@ def get_thread_participant_score_with_tags(future_time_stamp,past_time_stamp,tok
 				people_stat[participant] += 1
 			else:
 				people_stat[participant] = 1
-	print 'exp_count : ',exp_count
-	print 'nexp_count : ',nexp_count
+	# print 'exp_count : ',exp_count
+	# print 'nexp_count : ',nexp_count
 	return people_stat
 
 def get_msg_score(email,token):
@@ -70,26 +75,26 @@ def get_msg_score(email,token):
 	sent_stat = [None] * upto_weeks
 	receive_stat = [None] * upto_weeks
 	unread_stat = [None] * upto_weeks
-	unseen_stat = [None] * upto_weeks
+	# unseen_stat = [None] * upto_weeks
 	for i in xrange(0,upto_weeks):
-		print 'i = ',i
+		# print 'i = ',i
 		if i == 0:
 			future_time_stamp = helper.get_current_time_stamp()
 		else:
 			future_time_stamp = helper.get_old_time_stamp(i*7)
 		past_time_stamp = helper.get_old_time_stamp((i+1) * 7)
 		sent_stat[i] = get_msg_count_in_range(future_time_stamp,past_time_stamp,email,token,'from')
-		print 'sent_stat'
+		# print 'sent_stat'
 		receive_stat[i] = get_msg_count_in_range(future_time_stamp,past_time_stamp,email,token,'to')
-		print 'receive_stat'
-		unread_stat[i] = get_thread_participant_score_with_tags(future_time_stamp,past_time_stamp,token,'unread',token)
-		print 'unread_stat'
-		unseen_stat[i] = get_thread_participant_score_with_tags(future_time_stamp,past_time_stamp,token,'unseen',token)
-		print 'unseen_stat'
+		# print 'receive_stat'
+		unread_stat[i] = get_thread_participant_score_with_tags(future_time_stamp,past_time_stamp,token,'unread',email)
+		# print 'unread_stat'
+		# unseen_stat[i] = get_thread_participant_score_with_tags(future_time_stamp,past_time_stamp,token,'unseen',email)
+		# print 'unseen_stat'
 	helper.save_json('sent_last.json',sent_stat)
 	helper.save_json('receive_last.json',receive_stat)
 	helper.save_json('unread_last.json',unread_stat)
-	helper.save_json('unseen_last.json',unseen_stat)
+	# helper.save_json('unseen_last.json',unseen_stat)
 
 	return
 
@@ -117,9 +122,10 @@ def compute_primitive_score(email):
 	sent_stat = helper.load_json('sent_last.json')
 	receive_stat = helper.load_json('receive_last.json')
 	unread_stat = helper.load_json('unread_last.json')
-	unseen_stat = helper.load_json('unseen_last.json')
+	# unseen_stat = helper.load_json('unseen_last.json')
 
-	recent_contact = get_recent_contact([sent_stat,receive_stat,unread_stat,unseen_stat])
+	# recent_contact = get_recent_contact([sent_stat,receive_stat,unread_stat,unseen_stat])
+	recent_contact = get_recent_contact([sent_stat,receive_stat,unread_stat])
 
 	# pprint.pprint(recent_contact)
 
@@ -138,11 +144,12 @@ def compute_primitive_score(email):
 			3 * get_count_if_exist_else_zero(unread_stat[1],contact) +\
 			2 * get_count_if_exist_else_zero(unread_stat[2],contact) +\
 			1 * get_count_if_exist_else_zero(unread_stat[3],contact)
-		unseen_score = 0 * get_count_if_exist_else_zero(unseen_stat[0],contact)+\
-			3 * get_count_if_exist_else_zero(unseen_stat[1],contact) +\
-			2 * get_count_if_exist_else_zero(unseen_stat[2],contact) +\
-			1 * get_count_if_exist_else_zero(unseen_stat[3],contact)
-		score[contact] = sent_score + receive_score - unread_score - unseen_score
+		# unseen_score = 0 * get_count_if_exist_else_zero(unseen_stat[0],contact)+\
+		# 	3 * get_count_if_exist_else_zero(unseen_stat[1],contact) +\
+		# 	2 * get_count_if_exist_else_zero(unseen_stat[2],contact) +\
+		# 	1 * get_count_if_exist_else_zero(unseen_stat[3],contact)
+		# score[contact] = sent_score + receive_score - unread_score - unseen_score
+		score[contact] = sent_score + receive_score - unread_score
 
 	helper.save_json('score.json',score)
 
@@ -161,12 +168,6 @@ def get_other_participants_in_thread(thread,email_id):
 	plist  = filter(lambda x:x != email_id,participants)
 	return plist
 
-def get_id(ns,display_name):
-	labels = ns.labels.all()
-	label_id_list = [(x['display_name'],x['id']) for x in labels]
-	for label_display_name,label_id in label_id_list:
-		if label_display_name == display_name:
-			return label_id
 
 def get_id(ns,display_name):
 	labels = ns.labels.all()
