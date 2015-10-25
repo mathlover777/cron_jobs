@@ -2,18 +2,20 @@ import nylas_helper
 import token_store
 import time
 
-def tag_new_mails(email_id):
+def tag_new_mails(email_id,white_list):
 	token = token_store.get_token(email_id)
-	nylas_helper.tag_recent_unread_mails(email_id,token)
+	nylas_helper.tag_recent_unread_mails(email_id,token,white_list)
 	return
 
 def tag_new_mails_for_all_users():
 	user_list = token_store.get_email_prio_users()
+	white_list = token_store.get_white_list()
+	print white_list
 	print user_list
 	# user_list = ['souravmathlover@gmail.com']
 	for email_id in user_list:
 		try:
-			tag_new_mails(email_id)
+			tag_new_mails(email_id,white_list)
 		except Exception as e:
 			print 'tagger crashed for ' + email_id + ' Exception : {' + str(e) + '}'
 	return

@@ -22,7 +22,7 @@ def get_email_prio_users():
 	response = r.json()
 	if (response['success'] != 'true'):
 		print 'error !!'
-		return []	
+		return []
 	return response['prio_user_list']
 
 def update_contact_score(email_id,contact_score_json):
@@ -34,7 +34,7 @@ def update_contact_score(email_id,contact_score_json):
 	url = base_url + '/server/update_contact_score'
 	r = requests.post(url,data = payload)
 	response = r.json()
-	print response
+	# print response
 	return
 
 def get_contact_score_list(email_id,contact_list):
@@ -73,5 +73,18 @@ def set_last_updated_time_stamp(email_id,time_stamp):
 		print 'unable to update !'
 		print response
 	else:
-		print 'update successful'
+		# print 'update successful'
+		pass
 	return int(response['now_time'])
+
+
+def get_white_list():
+	payload = {}
+	url = base_url + '/server/get_white_list'
+	r = requests.post(url,data = payload)
+	response = r.json()
+	if response['success'] != 'true':
+		print 'unable to get whitelist for this session !'
+		# print response
+		return []
+	return map(lambda x:str(x),response["word_list"])

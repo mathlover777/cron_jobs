@@ -2,6 +2,7 @@ import nylas_helper
 import token_store
 import time
 
+
 def get_score_list_for_user(email_id):
 	token = token_store.get_token(email_id)
 	print email_id

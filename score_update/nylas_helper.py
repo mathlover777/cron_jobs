@@ -205,13 +205,9 @@ def tag_thread_given_condition(thread,label_flag,id_remove,id_add,score,boolean_
 		thread.update_folder(id_add)
 	return
 
-def is_white_listed_mail(subject_line):
-	white_list = ["Important","Urgent","Reset Password","Upcoming payment",\
-		"Registration","Register","Action item","Sign-in","Receipt","Return","Refund",\
-		"Itinerary","Bank transfer","Invoice","Shipment","Confirmation","Activation",\
-		"Contract","Password"]
-	normalized_white_list_set = set([x.lower().strip() for x in white_list])
-
+def is_white_listed_mail(subject_line,white_list):
+	# normalized_white_list_set = set([x.lower().strip() for x in white_list])
+	normalized_white_list_set = set(white_list) # the api already gives normalized strings
 	for word in normalized_white_list_set:
 		p = re.compile(word)
 		if re.search(p,subject_line) is not None:
@@ -221,7 +217,7 @@ def is_white_listed_mail(subject_line):
 
 
 
-def tag_unread_mails_in_time_range(email_id,token,now_time,old_time):
+def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list):
 	client = nylas.APIClient(APP_ID, APP_SECRET, token)
 	# ns = client.namespaces[0]
 	ns = client
@@ -251,7 +247,7 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time):
 
 	# print score_dict
 	for thread in recent_threads:
-		white_list_flag = is_white_listed_mail(thread['subject'])
+		white_list_flag = is_white_listed_mail(thread['subject'],white_list)
 		plist = get_other_participants_in_thread(thread,email_id)
 		score = 0.0
 		for participant in plist:
@@ -264,17 +260,17 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time):
 			tag_thread_given_condition(thread,label_flag,read_now_id,read_later_id,score,boolean_flags)
 	return
 
-def tag_recent_unread_mails(email_id,token):
+def tag_recent_unread_mails(email_id,token,white_list):
 	# this will retrieve the all unread threads
 	# now depending on the people involved in the thread other than the current
 	# it will check mails only on the last 60 mins
 
 	old_time = token_store.get_last_updated_time_stamp(email_id)
-	print time.strftime("%D %H:%M", time.localtime(int(old_time)))
+	# print time.strftime("%D %H:%M", time.localtime(int(old_time)))
 	now_time = token_store.set_last_updated_time_stamp(email_id,0)
 	# now_time = helper.get_current_time_stamp()
-	print time.strftime("%D %H:%M", time.localtime(int(now_time)))
+	# print time.strftime("%D %H:%M", time.localtime(int(now_time)))
 
-	tag_unread_mails_in_time_range(email_id,token,now_time,old_time)
+	tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list)
 	
 	return
