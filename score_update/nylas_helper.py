@@ -248,6 +248,7 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list):
 
 	# print score_dict
 	for thread in recent_threads:
+		# TODO refactor using is_object_important
 		white_list_flag = is_white_listed_mail(thread['subject'],white_list)
 		plist = get_other_participants_in_thread(thread,email_id)
 		score = 0.0
@@ -260,6 +261,17 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list):
 		else:
 			tag_thread_given_condition(thread,label_flag,read_now_id,read_later_id,score,boolean_flags)
 	return
+
+def is_object_important(delta_object,white_list,score_dict,other_participant_list):
+	white_list_flag = is_white_listed_mail(delta_object['subject'],white_list)
+	score = 0.0
+	for participant in other_participant_list:
+		score += score_dict[participant.encode('ascii','ignore').lower()]	
+	boolean_flags = white_list_flag
+	if(boolean_flags or score > 0.0):
+		# its a good object
+		return True
+	return False
 
 def tag_recent_unread_mails(email_id,token,white_list):
 	# this will retrieve the all unread threads

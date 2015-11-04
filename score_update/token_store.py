@@ -88,3 +88,40 @@ def get_white_list():
 		# print response
 		return []
 	return map(lambda x:str(x),response["word_list"])
+
+
+def store_cursor(email_id,cursor):
+	payload = {}
+	payload["email_id"] = email_id
+	payload["cursor"] = cursor
+	url = base_url + '/server/store_cursor'
+	r = requests.post(url,data = payload)
+	response = r.json()
+	if response['success'] != 'true':
+		print 'unable store cursor for !' + email_id
+		# print response
+	return
+
+def get_cursor(email_id,token):
+	payload = {}
+	payload["email_id"] = email_id
+	payload["token"] = token
+	url = base_url + '/server/get_cursor'
+	r = requests.post(url,data = payload)
+	response = r.json()
+	if response['success'] != 'true':
+		print 'unable get cursor for !' + email_id
+		# print response
+	return
+
+def send_push_notification(email_id,data):
+	payload = {}
+	payload["email_id"] = email_id
+	payload["json_data"] = json.dumps(data)
+	url = base_url + '/server/send_push_to_user'
+	r = requests.post(url,data = payload)
+	response = r.json()
+	if response['success'] != 'true':
+		print 'unable get cursor for !' + email_id
+		# print response
+	return
