@@ -15,11 +15,27 @@ def from_email_ids(email_id,single_delta_object):
 
 def get_object_info(email_id,single_delta_object):
 	single_delta_info = {}
-	single_delta_info["participants"] = from_email_ids(email_id,single_delta_object)
-	single_delta_info["snippet"] = single_delta_object["attributes"]["snippet"]
-	single_delta_info["subject"] = single_delta_object["attributes"]["subject"]
-	single_delta_info["object"] = single_delta_object["object"]
-	single_delta_info["unread"] = single_delta_object["attributes"]["unread"]
+	try:
+		single_delta_info["participants"] = from_email_ids(email_id,single_delta_object)
+	except:
+		single_delta_info["participants"] = []
+	try:
+		single_delta_info["snippet"] = single_delta_object["attributes"]["snippet"]
+	except:
+		single_delta_info["snippet"] = ""
+	try:
+		single_delta_info["subject"] = single_delta_object["attributes"]["subject"]
+	except:
+		single_delta_info["subject"] = "" 
+	try:
+		single_delta_info["object"] = single_delta_object["object"]
+	except:
+		single_delta_info["object"] = "thread"
+	try:
+		single_delta_info["unread"] = single_delta_object["attributes"]["unread"]
+	except:
+		single_delta_info["unread"] = False
+	
 	return single_delta_info
 
 def get_info_from_delta_object(email_id,delta_list):
