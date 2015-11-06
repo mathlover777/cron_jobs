@@ -130,4 +130,4 @@ while True:
 		run_push_for_all_users()
 	except Exception as e:
 		print 'push crashed !' + ' Exception : {' + str(e) + '}'
-	time.sleep(7200)
+	time.sleep(100)
