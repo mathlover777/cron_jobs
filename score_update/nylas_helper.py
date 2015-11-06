@@ -263,6 +263,10 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list):
 	return
 
 def is_object_important(delta_object,white_list,score_dict,other_participant_list):
+	
+	# print score_dict
+	# print other_participant_list
+
 	white_list_flag = is_white_listed_mail(delta_object['subject'],white_list)
 	score = 0.0
 	for participant in other_participant_list:

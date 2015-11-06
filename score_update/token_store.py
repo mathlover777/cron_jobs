@@ -82,9 +82,6 @@ def get_white_list():
 	payload = {}
 	url = base_url + '/server/get_white_list'
 	r = requests.post(url,data = payload)
-
-	print r
-
 	response = r.json()
 	if response['success'] != 'true':
 		print 'unable to get whitelist for this session !'
@@ -100,6 +97,9 @@ def store_cursor(email_id,cursor):
 	url = base_url + '/server/store_cursor'
 	r = requests.post(url,data = payload)
 	response = r.json()
+	# print 'store response'
+	# print response
+	# print '************'
 	if response['success'] != 'true':
 		print 'unable store cursor for !' + email_id
 		# print response
@@ -111,11 +111,19 @@ def get_cursor(email_id,token):
 	payload["token"] = token
 	url = base_url + '/server/get_cursor'
 	r = requests.post(url,data = payload)
+	
+	# print r
+
+
 	response = r.json()
+
+	# print response
+
+	# quit()
 	if response['success'] != 'true':
 		print 'unable get cursor for !' + email_id
 		# print response
-	return
+	return response["cursor"]
 
 def send_push_notification(email_id,title,body,data = {}):
 	payload = {}
