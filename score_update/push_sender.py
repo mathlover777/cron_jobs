@@ -1,6 +1,7 @@
 import token_store
 import requests
 import nylas_helper
+import json
 
 def from_email_ids(email_id,single_delta_object):
 	object_type = single_delta_object["object"]
@@ -46,14 +47,22 @@ def get_delta(email_id,token):
 	return delta
     
 def send_push_using_delta_info(email_id,delta_info):
-	push_content = get_push_content(delta_info)
-	token_store.send_push_notification(email_id,push_content)
+	title,body,data = get_push_content(delta_info)
+	token_store.send_push_notification(email_id,title,body,data)
 	return
 
 def get_push_content(delta_info):
-	push_data = {}
 
-	return push_data
+	print delta_info
+
+	push_data = {}
+	all_participant_list = reduce(lambda x,y:x + y,[x['participants'] for x in delta_info])
+	first_name_list = ','.join([x['name'].split()[0] for x in all_participant_list])
+	
+	title = "Important Mails from"
+	body = first_name_list
+	data = {}
+	return title,body,data
 
 def get_deltas_to_push(email_id,token,delta_info_list,white_list):
 	request_set = set([])
@@ -62,12 +71,15 @@ def get_deltas_to_push(email_id,token,delta_info_list,white_list):
 		for participant in plist:
 			request_set.add(participant)
 	score_dict = token_store.get_contact_score_list(email_id,list(request_set))
-	good_deltas = filter(lambda x:nylas_helper.is_object_important(x,white_list,score_dict,list(request_set)))
+	good_deltas = filter( lambda x:nylas_helper.is_object_important(x,white_list,score_dict,list(request_set)) , delta_info_list)
 	return good_deltas
 
 def run_push_for_user(email_id,white_list):
 	token = token_store.get_token(email_id)
 	delta = get_delta(email_id,token)
+
+	print delta
+
 	if len(delta) == 0 :
 		return
 	# we have got some changes

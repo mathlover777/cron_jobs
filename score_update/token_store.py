@@ -82,6 +82,9 @@ def get_white_list():
 	payload = {}
 	url = base_url + '/server/get_white_list'
 	r = requests.post(url,data = payload)
+
+	print r
+
 	response = r.json()
 	if response['success'] != 'true':
 		print 'unable to get whitelist for this session !'
@@ -114,14 +117,18 @@ def get_cursor(email_id,token):
 		# print response
 	return
 
-def send_push_notification(email_id,data):
+def send_push_notification(email_id,title,body,data = {}):
 	payload = {}
 	payload["email_id"] = email_id
-	payload["json_data"] = json.dumps(data)
+	payload["data"] = json.dumps(data)
+	payload["title"] = title
+	payload["body"] = body
+	
 	url = base_url + '/server/send_push_to_user'
 	r = requests.post(url,data = payload)
 	response = r.json()
+	print response
 	if response['success'] != 'true':
-		print 'unable get cursor for !' + email_id
+		print 'unable to send push notification to ' + email_id
 		# print response
 	return
