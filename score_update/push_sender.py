@@ -98,16 +98,19 @@ def get_deltas_to_push(email_id,token,delta_info_list,white_list):
 
 def run_push_for_user(email_id,white_list):
 	token = token_store.get_token(email_id)
+	print "token  : " + token
 	delta = get_delta(email_id,token)
 
 	# print delta
 
 	if len(delta) == 0 :
+		print "no delta to push"
 		return
 	# we have got some changes
 	delta_info_list = get_info_from_delta_object(email_id,delta)
 	deltas_to_push = get_deltas_to_push(email_id,token,delta_info_list,white_list)
 	if(len(deltas_to_push) > 0):
+		print "push to send !"
 		send_push_using_delta_info(email_id,deltas_to_push)
 	else:
 		print "no delta to push"
@@ -116,10 +119,16 @@ def run_push_for_user(email_id,white_list):
 
 def run_push_for_all_users():
 	user_list = token_store.get_email_prio_users()
+	# print user_list
 	# user_list = ['souravmathlover@gmail.com']
 	white_list = token_store.get_white_list()
 	for email_id in user_list:
-		run_push_for_user(email_id,white_list)
+		print '***************************'
+		print email_id
+		try:
+			run_push_for_user(email_id,white_list)
+		except:
+			print "push sender crashed for " + email_id
 	return
 
 
@@ -130,4 +139,6 @@ while True:
 		run_push_for_all_users()
 	except Exception as e:
 		print 'push crashed !' + ' Exception : {' + str(e) + '}'
+	# quit()
 	time.sleep(100)
+
