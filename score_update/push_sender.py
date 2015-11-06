@@ -121,9 +121,9 @@ def run_push_for_user(email_id,white_list):
 
 
 def run_push_for_all_users():
-	# user_list = token_store.get_email_prio_users()
+	user_list = token_store.get_email_prio_users()
 	# print user_list
-	user_list = ['souravmathlover@gmail.com']
+	# user_list = ['souravmathlover@gmail.com']
 	white_list = token_store.get_white_list()
 	for email_id in user_list:
 		print '***************************'
