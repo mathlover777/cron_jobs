@@ -19,7 +19,7 @@ def get_object_info(email_id,single_delta_object):
 	single_delta_info["snippet"] = single_delta_object["attributes"]["snippet"]
 	single_delta_info["subject"] = single_delta_object["attributes"]["subject"]
 	single_delta_info["object"] = single_delta_object["object"]
-	single_delta_info["unread"] = single_delta_object["unread"]
+	single_delta_info["unread"] = single_delta_object["attributes"]["unread"]
 	return single_delta_info
 
 def get_info_from_delta_object(email_id,delta_list):
@@ -56,6 +56,7 @@ def get_delta(email_id,token):
 		cursor = cursor_end
 	if server_cursor != cursor:
 		token_store.store_cursor(email_id,cursor)
+		pass
 	return delta_changes
     
 def send_push_using_delta_info(email_id,delta_info):
@@ -80,7 +81,7 @@ def get_push_content(delta_info):
 	return title,body,data
 
 def get_deltas_to_push(email_id,token,all_delta_info_list,white_list):
-
+	# print all_delta_info_list
 	delta_info_list = filter(lambda x:x["unread"],all_delta_info_list)
 	request_set = set([])
 	for delta_info in delta_info_list:
