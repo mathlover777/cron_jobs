@@ -19,6 +19,7 @@ def get_object_info(email_id,single_delta_object):
 	single_delta_info["snippet"] = single_delta_object["attributes"]["snippet"]
 	single_delta_info["subject"] = single_delta_object["attributes"]["subject"]
 	single_delta_info["object"] = single_delta_object["object"]
+	single_delta_info["unread"] = single_delta_object["unread"]
 	return single_delta_info
 
 def get_info_from_delta_object(email_id,delta_list):
@@ -47,8 +48,8 @@ def get_delta(email_id,token):
 		cursor_end = r_json["cursor_end"]
 		delta_changes = delta_changes + r_json["deltas"]
 		
-		# print cursor_start
-		# print cursor_end
+		print cursor_start
+		print cursor_end
 
 		if cursor_start == cursor_end:
 		    break
@@ -78,7 +79,9 @@ def get_push_content(delta_info):
 	data = {}
 	return title,body,data
 
-def get_deltas_to_push(email_id,token,delta_info_list,white_list):
+def get_deltas_to_push(email_id,token,all_delta_info_list,white_list):
+
+	delta_info_list = filter(lambda x:x["unread"],all_delta_info_list)
 	request_set = set([])
 	for delta_info in delta_info_list:
 		plist = delta_info["participants"]
@@ -118,17 +121,17 @@ def run_push_for_user(email_id,white_list):
 
 
 def run_push_for_all_users():
-	user_list = token_store.get_email_prio_users()
+	# user_list = token_store.get_email_prio_users()
 	# print user_list
-	# user_list = ['souravmathlover@gmail.com']
+	user_list = ['souravmathlover@gmail.com']
 	white_list = token_store.get_white_list()
 	for email_id in user_list:
 		print '***************************'
 		print email_id
 		try:
 			run_push_for_user(email_id,white_list)
-		except:
-			print "push sender crashed for " + email_id
+		except Exception as e:
+			print "push sender crashed for " + email_id + "exp {" + str(e) + "}"
 	return
 
 
