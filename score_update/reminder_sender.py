@@ -4,7 +4,7 @@ import nylas_helper
 import json
 import helper
 
-def is_thread_replied(email_id,thread,first_msg):	
+def is_thread_replied(email_id,thread,first_msg,nylas_client):
 	# print thread
 	message_id_list = thread["message_ids"]
 
@@ -60,8 +60,8 @@ def manage_expired_threads(email_id,expired_thread_list):
 		thread_object = nylas_client.threads.find(thread_id)
 		print thread_object
 
-		
-		if(is_thread_replied(email_id,thread_object,first_msg)):
+
+		if(is_thread_replied(email_id,thread_object,first_msg,nylas_client)):
 			print "thread is replied"
 			# token_store.remove_thread_from_reminder_list(email_id,thread_id)
 		else:
