@@ -63,7 +63,7 @@ def manage_expired_threads(email_id,expired_thread_list):
 
 		if(is_thread_replied(email_id,thread_object,first_msg,nylas_client)):
 			print "thread is replied"
-			# token_store.remove_thread_from_reminder_list(email_id,thread_id)
+			token_store.remove_thread_from_reminder_list(email_id,thread_id)
 		else:
 			print "thread is not replied"
 			send_reminder(email_id,thread_object,subject,auto_ask,first_msg)
