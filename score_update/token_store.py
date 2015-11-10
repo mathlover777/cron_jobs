@@ -147,9 +147,9 @@ def add_thread_to_reminder_list(email_id,max_time,thread_id,msg_id,auto_ask,subj
 		'msg_id':msg_id,'auto_ask':auto_ask,'subject':subject}
 	url = base_url + '/server/add_thread_to_reminder_list'
 	r = requests.post(url,data = payload)
-	print r
+	# print r
 	response = r.json()
-	print response
+	# print response
 	if response['success'] != 'true':
 		return False
 	return True
@@ -159,17 +159,18 @@ def add_thread_to_reminder_list(email_id,max_time,thread_id,msg_id,auto_ask,subj
 def get_expired_threads_in_reminder_list(email_id,max_time):
 	payload = {'email_id':email_id,'max_time':max_time}
 	
-	print payload	
+	# print payload	
 
 	url = base_url + '/server/get_expired_threads_in_reminder_list'
 	r = requests.post(url,data = payload)
-	print r
-	print '******************'
-	print r.text
-	print '******************'
+	# print r
+	# print '******************'
+	# print r.text
+	# print '******************'
 	response = r.json()
-	print response
+	# print response
 	if response['success'] != 'true':
+		print r.text
 		return []
 	return response["thread_list"]
 
@@ -177,10 +178,11 @@ def remove_thread_from_reminder_list(email_id,thread_id):
 	payload = {'email_id':email_id,'thread_id':thread_id}
 	url = base_url + '/server/remove_thread_from_reminder_list'
 	r = requests.post(url,data = payload)
-	print r
+	# print r
 	response = r.json()
-	print response
+	# print response
 	if response['success'] != 'true':
+		print r.text
 		return False
 	return True
 
@@ -193,10 +195,11 @@ def send_mail_to_users(sender_id,sender_name,receiver_list,subject,body,msg_id =
 		'receiver_list':receiver_list,'body':body,'msg_id':msg_id,'subject':subject}
 	url = base_url + '/server/send_mail_to_users'
 	r = requests.post(url,data = payload)
-	print r
-	print r.text
+	# print r
+	# print r.text
 	response = r.json()
-	print response
+	# print response
 	if response['success'] != 'true':
+		print r.text
 		return False
 	return True

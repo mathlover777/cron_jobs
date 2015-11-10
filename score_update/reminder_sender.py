@@ -58,7 +58,7 @@ def manage_expired_threads(email_id,expired_thread_list):
 		subject = thread["subject"]
 
 		thread_object = nylas_client.threads.find(thread_id)
-		print thread_object
+		# print thread_object
 
 
 		if(is_thread_replied(email_id,thread_object,first_msg,nylas_client)):
@@ -86,7 +86,7 @@ def run_reminder_sender_for_user(email_id):
 
 
 def run_reminder_sender_for_all_users():
-	# user_list = token_store.get_email_prio_users()
+	user_list = token_store.get_email_prio_users()
 	# print user_list
 	user_list = ['souravmathlover@gmail.com']
 	for email_id in user_list:
@@ -99,13 +99,13 @@ def run_reminder_sender_for_all_users():
 	return
 
 
-run_reminder_sender_for_all_users()
+# run_reminder_sender_for_all_users()
 
-# while True:
-# 	try:
-# 		run_reminder_sender_for_all_users()
-# 	except Exception as e:
-# 		print 'push crashed !' + ' Exception : {' + str(e) + '}'
-# 	# quit()
-# 	time.sleep(100)
+while True:
+	try:
+		run_reminder_sender_for_all_users()
+	except Exception as e:
+		print 'push crashed !' + ' Exception : {' + str(e) + '}'
+	# quit()
+	time.sleep(3600)
 
