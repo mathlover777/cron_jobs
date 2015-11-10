@@ -262,6 +262,9 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list):
 			tag_thread_given_condition(thread,label_flag,read_now_id,read_later_id,score,boolean_flags)
 	return
 
+def get_nylas_client(token):
+	return nylas.APIClient(APP_ID, APP_SECRET, token)
+
 def is_object_important(delta_object,white_list,score_dict,other_participant_list):
 	
 	# print score_dict

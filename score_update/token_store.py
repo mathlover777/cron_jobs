@@ -4,6 +4,7 @@ import helper
 
 planck_hard_pass = 'planck_test'
 base_url = 'http://token-store-dev.elasticbeanstalk.com'
+# base_url = 'http://127.0.0.1:8000'
 
 
 def get_token(email_id):
@@ -140,3 +141,62 @@ def send_push_notification(email_id,title,body,data = {}):
 		print 'unable to send push notification to ' + email_id
 		# print response
 	return
+
+def add_thread_to_reminder_list(email_id,max_time,thread_id,msg_id,auto_ask,subject):
+	payload = {'email_id':email_id,'max_time':max_time,'thread_id':thread_id,
+		'msg_id':msg_id,'auto_ask':auto_ask,'subject':subject}
+	url = base_url + '/server/add_thread_to_reminder_list'
+	r = requests.post(url,data = payload)
+	print r
+	response = r.json()
+	print response
+	if response['success'] != 'true':
+		return False
+	return True
+
+
+
+def get_expired_threads_in_reminder_list(email_id,max_time):
+	payload = {'email_id':email_id,'max_time':max_time}
+	
+	print payload	
+
+	url = base_url + '/server/get_expired_threads_in_reminder_list'
+	r = requests.post(url,data = payload)
+	print r
+	print '******************'
+	print r.text
+	print '******************'
+	response = r.json()
+	print response
+	if response['success'] != 'true':
+		return []
+	return response["thread_list"]
+
+def remove_thread_from_reminder_list(email_id,thread_id):
+	payload = {'email_id':email_id,'thread_id':thread_id}
+	url = base_url + '/server/remove_thread_from_reminder_list'
+	r = requests.post(url,data = payload)
+	print r
+	response = r.json()
+	print response
+	if response['success'] != 'true':
+		return False
+	return True
+
+def send_mail_to_users(sender_id,sender_name,receiver_list,subject,body,msg_id = None):
+	if sender_id is None:
+		sender_id = 'reminders@plancklabs.com'
+	if  sender_name is None:
+		sender_name = 'Reminders Planck Labs'
+	payload = {'sender_id':sender_id,'sender_name':sender_name,
+		'receiver_list':receiver_list,'body':body,'msg_id':msg_id,'subject':subject}
+	url = base_url + '/server/send_mail_to_users'
+	r = requests.post(url,data = payload)
+	print r
+	print r.text
+	response = r.json()
+	print response
+	if response['success'] != 'true':
+		return False
+	return True
