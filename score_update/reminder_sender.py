@@ -89,7 +89,7 @@ def run_reminder_sender_for_user(email_id):
 def run_reminder_sender_for_all_users():
 	user_list = token_store.get_email_prio_users()
 	# print user_list
-	user_list = ['souravmathlover@gmail.com']
+	# user_list = ['souravmathlover@gmail.com']
 	for email_id in user_list:
 		print '***************************'
 		print email_id
@@ -106,7 +106,7 @@ while True:
 	try:
 		run_reminder_sender_for_all_users()
 	except Exception as e:
-		print 'push crashed !' + ' Exception : {' + str(e) + '}'
+		print 'reminder sender crashed !' + ' Exception : {' + str(e) + '}'
 	# quit()
 	time.sleep(3600)
 
