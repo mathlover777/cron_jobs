@@ -3,7 +3,8 @@ import json
 import helper
 
 planck_hard_pass = 'planck_test'
-base_url = 'http://token-store-dev.elasticbeanstalk.com'
+base_url = 'http://planckapi-dev.elasticbeanstalk.com'
+# base_url = 'http://token-store-dev.elasticbeanstalk.com'
 # base_url = 'http://127.0.0.1:8000'
 
 
