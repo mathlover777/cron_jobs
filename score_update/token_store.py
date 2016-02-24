@@ -60,7 +60,7 @@ def get_last_updated_time_stamp(email_id):
 	url = base_url + '/server/get_last_updated_time_stamp'
 	r = requests.post(url,data = payload)
 	response = r.json()
-	print response
+	# print response
 	if response['success'] != 'true':
 		print response
 		return helper.get_old_time_stamp_by_minute(60)

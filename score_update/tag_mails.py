@@ -11,7 +11,7 @@ def tag_new_mails(email_id,white_list):
 
 def tag_new_mails_for_all_users():
 	user_list = token_store.get_email_prio_users()
-	# user_list = ['sachinkumar1911@yahoo.com']
+	# user_list = ['v.ivanenko@artk.ai']
 	white_list = token_store.get_white_list()
 	print white_list
 	print user_list
@@ -26,4 +26,4 @@ while True:
 		tag_new_mails_for_all_users()
 	except Exception as e:
 		print 'tagger crashed' + ' Exception : {' + str(e) + '}'
-	time.sleep(60)
+		time.sleep(60)

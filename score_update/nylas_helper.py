@@ -212,9 +212,14 @@ def get_email_domain(email_id):
 	domain = re.search("@[\w.]+", email_str)
 	return str(domain.group())
 
-def use_labels(email_id):
-	email_domain = get_email_domain(email_id)
-	if email_domain.lower() == '@gmail.com':
+# def use_labels(email_id):
+# 	email_domain = get_email_domain(email_id)
+# 	if email_domain.lower() == '@gmail.com':
+# 		return True
+# 	return False
+
+def use_labels(ns):
+	if(ns.account['organization_unit'] == 'label'):
 		return True
 	return False
 
@@ -270,9 +275,8 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 			request_set.add(participant)
 	
 	score_dict = token_store.get_contact_score_list(email_id,list(request_set))
-	
 
-	if use_labels(email_id):
+	if use_labels(ns):
 		read_now_id = get_id(ns,'Read Now')
 		read_later_id = get_id(ns,'Read Later')
 		social_id = get_id(ns, 'Social')
@@ -287,8 +291,9 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 			social_id = add_folder(ns, 'Social')
 		label_flag = False
 	# raw_input("ok")
+	print 'label-use:',label_flag
 
-	# print score_dict
+	# print
 	for thread in recent_threads:
 		# TODO refactor using is_object_important
 		# print "yes"
@@ -296,20 +301,23 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 		plist = get_other_participants_in_thread(thread,email_id)
 		
 		social_list_flag = is_social_mail(email_id, thread['subject'], thread['participants'], social_list)
+		# print thread['participants']
 		if(social_list_flag):
-			print "Social mail", thread['participants']
+			print 'INFO:',email_id,thread['id'],"Social", 
 			add_thread_to_social(thread, label_flag, social_id)
 		else:
 			score = 0.0
 			# print "Unsocial"
 			for participant in plist:
 				score += score_dict[participant.encode('ascii','ignore').lower()]
-
 			boolean_flags = white_list_flag
+			# print 'score',score, boolean_flags
 			if score > 0 or boolean_flags:
-				tag_thread_given_condition(thread,label_flag,read_later_id,read_now_id,score,boolean_flags)
+				print 'INFO:',email_id, thread['id'],"read now"
+				# tag_thread_given_condition(thread,label_flag,read_later_id,read_now_id,score,boolean_flags)
 			else:
-				tag_thread_given_condition(thread,label_flag,read_now_id,read_later_id,score,boolean_flags)
+				print 'INFO:',email_id,thread['id'],"read later"
+				# tag_thread_given_condition(thread,label_flag,read_now_id,read_later_id,score,boolean_flags)
 	print 'done'
 	return
 
@@ -339,7 +347,7 @@ def tag_recent_unread_mails(email_id,token,white_list, social_list=[]):
 	old_time = token_store.get_last_updated_time_stamp(email_id)
 	# print time.strftime("%D %H:%M", time.localtime(int(old_time))), 
 	now_time = token_store.set_last_updated_time_stamp(email_id,0)
-	print old_time, now_time
+	# print old_time, now_time
 	# now_time = helper.get_current_time_stamp()
 	# print time.strftime("%D %H:%M", time.localtime(int(now_time)))
 
