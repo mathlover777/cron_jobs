@@ -8,8 +8,8 @@ def archive_blacklisted_mails(email_id):
 	return
 
 def archive_blacklist_for_all_users():
-	# user_list = token_store.get_email_prio_users()
-	user_list = ['kumar.sachin52@gmail.com']
+	user_list = token_store.get_email_prio_users()
+	# user_list = ['kumar.sachin52@gmail.com']
 	print user_list
 	for email_id in user_list:
 		try:
