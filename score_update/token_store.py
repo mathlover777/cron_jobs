@@ -251,7 +251,7 @@ def get_new_blacklist(email_id):
 	url = prioritizer_url + '/api/get_new_blacklist/'
 	r = requests.post(url,data = payload)
 	response = r.json()
-	print response
+	# print response
 	if response['success'] != 'true':
 		print 'Unable to get blacklist for email_id: '+email_id
 		# print response
@@ -264,7 +264,7 @@ def get_blacklist(email_id):
 	url = prioritizer_url + '/api/get_blacklist/'
 	r = requests.post(url,data = payload)
 	response = r.json()
-	print response
+	# print response
 	if response['success'] != 'true':
 		print 'Unable to get blacklist for email_id: '+email_id
 		# print response

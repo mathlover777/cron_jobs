@@ -277,6 +277,7 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 
 	request_set = set([])
 	for thread in recent_threads_list:
+		# print thread['participants']
 		plist = get_other_participants_in_thread(thread,email_id)
 		for participant in plist:
 			request_set.add(participant)
@@ -323,6 +324,7 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 		if(social_list_flag):
 			print 'INFO:',email_id,thread['id'],"Social", 
 			add_thread_to_social(thread, label_flag, social_id)
+			continue
 
 		white_list_flag = is_white_listed_mail(thread['subject'],white_list)
 		score = 0.0
