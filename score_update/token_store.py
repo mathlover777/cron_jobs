@@ -4,6 +4,7 @@ import helper
 
 planck_hard_pass = 'planck_test'
 base_url = 'http://planckapi-dev.elasticbeanstalk.com'
+prioritizer_url = 'http://planckapi-prioritizer.us-west-1.elasticbeanstalk.com'
 # base_url = 'http://token-store-dev.elasticbeanstalk.com'
 # base_url = 'http://127.0.0.1:8000'
 
@@ -243,3 +244,25 @@ def remove_thread_from_followup(email_id,thread_id,token):
 		# print response
 		return False
 	return True
+
+#uses prioritizer url
+def get_new_blacklist(email_id):
+	payload = {'email_id':email_id}
+	url = prioritizer_url + '/api/get_new_blacklist/'
+	r = requests.post(url,data = payload)
+	response = r.json()
+	print response
+	if response['success'] != 'true':
+		print 'Unable to get blacklist for email_id: '+email_id
+		# print response
+		return []
+	return map(lambda x:str(x),response["blacklist_new"])
+
+#uses prioritizer url
+def remove_from_new_blacklist(email_id, black_email):
+	payload = {'email_id':email_id, 'blacklist_id':black_email}
+	url = prioritizer_url + '/api/remove_from_new_blacklist/'
+	r = requests.post(url,data = payload)
+	response = r.json()
+	if response['success'] != 'true':
+		print 'Error on request. Unable to remove from',black_email,'from blacklist of email_id: '+email_id

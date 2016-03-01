@@ -242,6 +242,12 @@ def add_thread_to_social(thread, label_flag, social_id):
 	else:
 		thread.update_folder(social_id)
 
+def add_thread_to_blacklist(thread, label_flag, blacklist_id):
+	if(label_flag):
+		thread.update_labels([blacklist_id])
+	else:
+		thread.update_folder(blacklist_id)
+
 def is_white_listed_mail(subject_line,white_list):
 	# normalized_white_list_set = set([x.lower().strip() for x in white_list])
 	normalized_white_list_set = set(white_list) # the api already gives normalized strings
@@ -265,9 +271,10 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 	client = nylas.APIClient(APP_ID, APP_SECRET, token)
 	# ns = client.namespaces[0]
 	ns = client
+	print >> sys.stderr, "Making request for",old_time, now_time
 	recent_threads = ns.threads.where(**{'last_message_after':old_time-600,'last_message_before' :now_time})
 	recent_threads_list = [x for x in recent_threads]
-	# print recent_threads_list
+
 	request_set = set([])
 	for thread in recent_threads_list:
 		plist = get_other_participants_in_thread(thread,email_id)
@@ -282,6 +289,10 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 		social_id = get_id(ns, 'Social')
 		if social_id is None:
 			social_id = add_label(ns, 'Social')
+		blacklist_id = get_id(ns, 'Black Hole')
+		if(blacklist_id is None):
+			blacklist_id = add_label(ns, 'Black Hole')
+
 		label_flag = True
 	else:
 		read_now_id = get_folder_id(ns,'Read Now')
@@ -289,36 +300,41 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 		social_id = get_folder_id(ns, 'Social')
 		if social_id is None:
 			social_id = add_folder(ns, 'Social')
-		label_flag = False
-	# raw_input("ok")
-	print 'label-use:',label_flag
+		blacklist_id = get_folder_id(ns, 'Black Hole')
+		if(blacklist_id is None):
+			blacklist_id = add_folder(ns, 'Black Hole')
 
-	# print
+		label_flag = False
+	
 	for thread in recent_threads:
 		# TODO refactor using is_object_important
-		# print "yes"
-		white_list_flag = is_white_listed_mail(thread['subject'],white_list)
 		plist = get_other_participants_in_thread(thread,email_id)
-		
+		blacklist = token_store.get_blacklist(email_id)
+		blacklist_flag = False
+		if(len(plist) == 1):
+			if(plist[0].lower() in blacklist):
+				blacklist_flag = True
+		if(blacklist_flag):
+			print 'INFO:', email_id, thread['id'], "Black Hole"
+			add_thread_to_blacklist(thread, label, blacklist_id)
+			continue
+
 		social_list_flag = is_social_mail(email_id, thread['subject'], thread['participants'], social_list)
-		# print thread['participants']
 		if(social_list_flag):
 			print 'INFO:',email_id,thread['id'],"Social", 
 			add_thread_to_social(thread, label_flag, social_id)
+
+		white_list_flag = is_white_listed_mail(thread['subject'],white_list)
+		score = 0.0
+		for participant in plist:
+			score += score_dict[participant.encode('ascii','ignore').lower()]
+		boolean_flags = white_list_flag
+		if score > 0 or boolean_flags:
+			tag_thread_given_condition(thread,label_flag,read_later_id,read_now_id,score,boolean_flags)
+			print 'INFO:',email_id, thread['id'],"Read Now"
 		else:
-			score = 0.0
-			# print "Unsocial"
-			for participant in plist:
-				score += score_dict[participant.encode('ascii','ignore').lower()]
-			boolean_flags = white_list_flag
-			# print 'score',score, boolean_flags
-			if score > 0 or boolean_flags:
-				tag_thread_given_condition(thread,label_flag,read_later_id,read_now_id,score,boolean_flags)
-				print 'INFO:',email_id, thread['id'],"read now"
-			else:
-				tag_thread_given_condition(thread,label_flag,read_now_id,read_later_id,score,boolean_flags)
-				print 'INFO:',email_id,thread['id'],"read later"
-	print 'done'
+			tag_thread_given_condition(thread,label_flag,read_now_id,read_later_id,score,boolean_flags)
+			print 'INFO:',email_id,thread['id'],"Read Later"
 	return
 
 def get_nylas_client(token):
@@ -354,3 +370,27 @@ def tag_recent_unread_mails(email_id,token,white_list, social_list=[]):
 	tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list)
 	
 	return
+
+def archive_old_blacklist_mails(email_id, token):
+	blacklist = token_store.get_new_blacklist(email_id)
+	client = nylas.APIClient(APP_ID, APP_SECRET, token)
+	ns = client
+	
+	label_flag = use_labels(ns)
+	if(label_flag):
+		blacklist_id = get_id(ns, 'Black Hole')
+		if(blacklist_id is None):
+			blacklist_id = add_label(ns, 'Black Hole')
+	else:
+		blacklist_id = get_folder_id(ns, 'Black Hole')
+		if(blacklist_id is None):
+			blacklist_id = add_folder(ns, 'Black Hole')
+
+	for black_email in blacklist:
+		for message in ns.messages.where(**{'from':black_email, 'in':'all'}):
+			if(label_flag):
+				message.update_labels([blacklist_id])
+			else:
+				message.update_folder(blacklist_id)
+
+		token_store.remove_from_new_blacklist(email_id, black_email)
