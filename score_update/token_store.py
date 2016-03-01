@@ -259,6 +259,19 @@ def get_new_blacklist(email_id):
 	return map(lambda x:str(x),response["blacklist_new"])
 
 #uses prioritizer url
+def get_blacklist(email_id):
+	payload = {'email_id':email_id}
+	url = prioritizer_url + '/api/get_blacklist/'
+	r = requests.post(url,data = payload)
+	response = r.json()
+	print response
+	if response['success'] != 'true':
+		print 'Unable to get blacklist for email_id: '+email_id
+		# print response
+		return []
+	return map(lambda x:str(x),response["blacklist"])
+
+#uses prioritizer url
 def remove_from_new_blacklist(email_id, black_email):
 	payload = {'email_id':email_id, 'blacklist_id':black_email}
 	url = prioritizer_url + '/api/remove_from_new_blacklist/'
