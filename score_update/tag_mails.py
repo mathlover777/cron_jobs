@@ -10,8 +10,8 @@ def tag_new_mails(email_id,white_list):
 	return
 
 def tag_new_mails_for_all_users():
-	# user_list = token_store.get_email_prio_users()
-	user_list = ['rajesh.x.kumar@gmail.com']
+	user_list = token_store.get_email_prio_users()
+	# user_list = ['rajesh.x.kumar@gmail.com']
 	white_list = token_store.get_white_list()
 	print white_list
 	print user_list

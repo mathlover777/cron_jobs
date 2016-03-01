@@ -277,7 +277,7 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 
 	request_set = set([])
 	for thread in recent_threads_list:
-		# print thread['participants']
+		print thread['participants']
 		plist = get_other_participants_in_thread(thread,email_id)
 		for participant in plist:
 			request_set.add(participant)
@@ -369,7 +369,7 @@ def tag_recent_unread_mails(email_id,token,white_list, social_list=[]):
 	# now_time = helper.get_current_time_stamp()
 	# print time.strftime("%D %H:%M", time.localtime(int(now_time)))
 
-	tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list)
+	tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, social_list)
 	
 	return
 
