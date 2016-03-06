@@ -304,13 +304,13 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 			if(plist[0].lower() in blacklist):
 				blacklist_flag = True
 		if(blacklist_flag):
-			print 'INFO:', email_id, thread['id'], "Black Hole"
+			print 'INFO:', email_id, thread['id'], "B"
 			add_thread_to_blacklist(thread, label, blacklist_id)
 			continue
 
 		social_list_flag = is_social_mail(email_id, thread['subject'], thread['participants'], social_list)
 		if(social_list_flag):
-			print 'INFO:',email_id,thread['id'],"Social", 
+			print 'INFO:',email_id,thread['id'],"S", 
 			add_thread_to_social(thread, label_flag, social_id)
 			continue
 
@@ -321,10 +321,10 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 		boolean_flags = white_list_flag
 		if score > 0 or boolean_flags:
 			tag_thread_given_condition(thread,label_flag,read_later_id,read_now_id,score,boolean_flags)
-			print 'INFO:',email_id, thread['id'],"Read Now"
+			print 'INFO:',email_id, thread['id'],"N"
 		else:
 			tag_thread_given_condition(thread,label_flag,read_now_id,read_later_id,score,boolean_flags)
-			print 'INFO:',email_id,thread['id'],"Read Later"
+			print 'INFO:',email_id, thread['id'],"L"
 	return
 
 def get_nylas_client(token):
