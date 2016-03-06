@@ -23,7 +23,7 @@ def get_msg_count_in_range(future_time_stamp,past_time_stamp,email,token,directi
 	# print past_time_stamp,time.strftime("%D %H:%M", time.localtime(int(past_time_stamp)))
 	sent_people_stat = {}
 	for message in message_list:
-		print message
+		# print message
 		for sent_address in message['to']:
 			sent_address_email = sent_address['email']
 			if sent_address_email in sent_people_stat:
@@ -159,7 +159,7 @@ def compute_primitive_score(email):
 	return score
 
 def get_recent_contact_score(email_id,token):
-	print "get_recent_contact_score"
+	# print "get_recent_contact_score"
 	get_msg_score(email_id,token)
 	score_list = compute_primitive_score(email_id)
 	return score_list
@@ -184,14 +184,14 @@ def add_label(ns, display_name):
 	label = ns.labels.create(display_name=display_name)
 	label.save()
 	msg = display_name + ' added'
-	print msg
+	# print msg
 	return label.get('id')
 
 def add_folder(ns, display_name):
 	folder = ns.folders.create(display_name=display_name)
 	folder.save()
 	msg = display_name + ' added'
-	print msg
+	# print msg
 	return folder.get('id')
 
 def get_folder_id(ns,display_name):
@@ -201,22 +201,10 @@ def get_folder_id(ns,display_name):
 		if label_display_name == display_name:
 			return label_id
 
-def add_folder(ns, display_name):
-	folder = ns.folders.create(display_name=display_name)
-	folder.save()
-	msg = display_name + ' added'
-	print msg
-
 def get_email_domain(email_id):
 	email_str = email_id.encode('ascii','ignore')
 	domain = re.search("@[\w.]+", email_str)
 	return str(domain.group())
-
-# def use_labels(email_id):
-# 	email_domain = get_email_domain(email_id)
-# 	if email_domain.lower() == '@gmail.com':
-# 		return True
-# 	return False
 
 def use_labels(ns):
 	if(ns.account['organization_unit'] == 'label'):
@@ -271,7 +259,7 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 	client = nylas.APIClient(APP_ID, APP_SECRET, token)
 	# ns = client.namespaces[0]
 	ns = client
-	print >> sys.stderr, "Making request for",old_time, now_time
+	# print >> sys.stderr, "Making request for",old_time, now_time
 	recent_threads = ns.threads.where(**{'last_message_after':old_time-600,'last_message_before' :now_time})
 	recent_threads_list = [x for x in recent_threads]
 
