@@ -260,7 +260,8 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 	# ns = client.namespaces[0]
 	ns = client
 	# print >> sys.stderr, "Making request for",old_time, now_time
-	recent_threads = ns.threads.where(**{'last_message_after':old_time-600,'last_message_before' :now_time})
+	# recent_threads = ns.threads.where(**{'last_message_after':old_time-600,'last_message_before' :now_time})
+	recent_threads = ns.threads.where(**{'from':'printshop@photobucket.com', 'in':'inbox'})
 	recent_threads_list = [x for x in recent_threads]
 
 	request_set = set([])
@@ -303,9 +304,10 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 		if(len(plist) == 1):
 			if(plist[0].lower() in blacklist):
 				blacklist_flag = True
+		# print plist, blacklist_flag
 		if(blacklist_flag):
 			print 'INFO:', email_id, thread['id'], "B"
-			add_thread_to_blacklist(thread, label, blacklist_id)
+			add_thread_to_blacklist(thread, label_flag, blacklist_id)
 			continue
 
 		social_list_flag = is_social_mail(email_id, thread['subject'], thread['participants'], social_list)
@@ -377,7 +379,7 @@ def archive_old_blacklist_mails(email_id, token):
 			blacklist_id = add_folder(ns, 'Black Hole')
 
 	for black_email in blacklist:
-		for message in ns.messages.where(**{'from':black_email, 'in':'all'}):
+		for message in ns.messages.where(**{'from':black_email}):
 			if(label_flag):
 				message.update_labels([blacklist_id])
 			else:
