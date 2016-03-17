@@ -279,3 +279,13 @@ def remove_from_new_blacklist(email_id, black_email):
 	response = r.json()
 	if response['success'] != 'true':
 		print 'Error on request. Unable to remove from',black_email,'from blacklist of email_id: '+email_id
+
+def get_contact(email_id, contact_email_id):
+	payload = {'email_id':email_id, 'contact_email_id':contact_email_id}
+	url = prioritizer_url + '/api/get_contact/'
+	r = requests.post(url,data = payload)
+	response = r.json()
+	if response['success'] != 'true':
+		return None
+	else:
+		return response['contact_json']

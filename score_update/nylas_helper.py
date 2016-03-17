@@ -237,8 +237,9 @@ def add_thread_to_blacklist(thread, label_flag, blacklist_id):
 		thread.update_folder(blacklist_id)
 
 def is_white_listed_mail(subject_line,white_list):
-	# normalized_white_list_set = set([x.lower().strip() for x in white_list])
+	subject_line = subject_line.lower()
 	normalized_white_list_set = set(white_list) # the api already gives normalized strings
+	
 	for word in normalized_white_list_set:
 		p = re.compile(word)
 		if re.search(p,subject_line) is not None:
@@ -255,13 +256,30 @@ def is_social_mail(email_id, subject, participants, social_list):
 					return True
 	return False
 
+def contains_contact(email_id, participants):
+	for participant in participants:
+		if token_store.get_contact(email_id, participant) is not None:
+			return True
+	return False
+
+def is_spam_thread(thread, label_flag):
+	if label_flag:
+		labelnames = [label['name'] for label in thread['_labels']]
+		if('spam' in labelnames or 'junk' in labelnames):
+			return True
+	else:
+		foldernames = [folder['name'] for folder in thread['_folders']]
+		if('spam' in foldernames or 'junk' in foldernames):
+			return True
+
+	return False
+
 def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, social_list=[]):
 	client = nylas.APIClient(APP_ID, APP_SECRET, token)
-	# ns = client.namespaces[0]
 	ns = client
-	# print >> sys.stderr, "Making request for",old_time, now_time
-	# recent_threads = ns.threads.where(**{'last_message_after':old_time-600,'last_message_before' :now_time})
-	recent_threads = ns.threads.where(**{'from':'printshop@photobucket.com', 'in':'inbox'})
+
+	recent_threads = ns.threads.where(**{'last_message_after':old_time-600,'last_message_before' :now_time, 'in':'inbox'})
+	# recent_threads = ns.threads.where(**{'from':'dipayan1992@gmail.com', 'in':'inbox'})
 	recent_threads_list = [x for x in recent_threads]
 
 	request_set = set([])
@@ -299,34 +317,39 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 	for thread in recent_threads_list:
 		# TODO refactor using is_object_important
 		plist = get_other_participants_in_thread(thread,email_id)
+
 		blacklist = token_store.get_blacklist(email_id)
 		blacklist_flag = False
 		if(len(plist) == 1):
 			if(plist[0].lower() in blacklist):
 				blacklist_flag = True
-		# print plist, blacklist_flag
+
 		if(blacklist_flag):
 			print 'INFO:', email_id, thread['id'], "B"
 			add_thread_to_blacklist(thread, label_flag, blacklist_id)
 			continue
 
 		social_list_flag = is_social_mail(email_id, thread['subject'], thread['participants'], social_list)
-		if(social_list_flag):
-			print 'INFO:',email_id,thread['id'],"S", 
-			add_thread_to_social(thread, label_flag, social_id)
-			continue
-
 		white_list_flag = is_white_listed_mail(thread['subject'],white_list)
+		contact_flag = contains_contact(email_id, plist)
+
 		score = 0.0
 		for participant in plist:
 			score += score_dict[participant.encode('ascii','ignore').lower()]
-		boolean_flags = white_list_flag
+
+		boolean_flags = white_list_flag or contact_flag
+		# print "C", contact_flag
+
 		if score > 0 or boolean_flags:
 			tag_thread_given_condition(thread,label_flag,read_later_id,read_now_id,score,boolean_flags)
-			print 'INFO:',email_id, thread['id'],"N"
+			# print 'INFO:',email_id, thread['id'],"N"
 		else:
+			if(social_list_flag):
+				# print 'INFO:',email_id,thread['id'],"S", 
+				add_thread_to_social(thread, label_flag, social_id)
+				continue
 			tag_thread_given_condition(thread,label_flag,read_now_id,read_later_id,score,boolean_flags)
-			print 'INFO:',email_id, thread['id'],"L"
+			# print 'INFO:',email_id, thread['id'],"L"
 	return
 
 def get_nylas_client(token):
