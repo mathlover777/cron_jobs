@@ -211,21 +211,18 @@ def use_labels(ns):
 		return True
 	return False
 
-def tag_thread_given_condition(thread, label_flag, id_remove, id_add, score, boolean_flags):
+def add_thread_to_readnow(thread, label_flag, read_now_id, read_later_id):
 	if label_flag:
 		# use labels
-		thread.remove_label(id_remove)
-		thread.add_label(id_add)
-	else:
-		# use folder
-		if score > 0 or boolean_flags:
-			return
-		thread.update_folder(id_add)
+		thread.remove_label(read_later_id)
+		thread.add_label(read_now_id)
+	#no need to update folders in case of read now. The mail remains in inbox
 	return
 
-def add_thread_to_clutter(thread, label_flag, clutter_id):
+def add_thread_to_clutter(thread, label_flag, clutter_id, inbox_id):
 	if(label_flag):
-		thread.update_labels([clutter_id])
+		thread.remove_label(inbox_id)
+		thread.add_label(clutter_id)
 	else:
 		thread.update_folder(clutter_id)
 
@@ -298,6 +295,7 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 	score_dict = token_store.get_contact_score_list(email_id,list(request_set))
 
 	if use_labels(ns):
+		inbox_id = get_id(ns, 'Inbox')
 		read_now_id = get_id(ns,'Read Now')
 		read_later_id = get_id(ns,'Read Later')
 		social_id = get_id(ns, 'Social')
@@ -309,6 +307,7 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 
 		label_flag = True
 	else:
+		inbox_id = get_folder_id(ns, 'Inbox')
 		read_now_id = get_folder_id(ns,'Read Now')
 		read_later_id = get_folder_id(ns,'Read Later')
 		social_id = get_folder_id(ns, 'Social')
@@ -344,17 +343,16 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 			score += score_dict[participant.encode('ascii','ignore').lower()]
 
 		boolean_flags = white_list_flag or contact_flag
-		# print "C", contact_flag
 
 		if score > 0 or boolean_flags:
-			tag_thread_given_condition(thread,label_flag,read_later_id,read_now_id,score,boolean_flags)
+			add_thread_to_readnow(thread, label_flag, read_now_id, read_later_id)
 			# print 'INFO:',email_id, thread['id'],"N"
 		else:
 			if(social_list_flag):
 				# print 'INFO:',email_id,thread['id'],"S", 
 				add_thread_to_social(thread, label_flag, social_id)
 				continue
-			add_thread_to_clutter(thread, label_flag, read_later_id)
+			add_thread_to_clutter(thread, label_flag, read_later_id, inbox_id)
 			# tag_thread_given_condition(thread,label_flag,read_now_id,read_later_id,score,boolean_flags)
 			# print 'INFO:',email_id, thread['id'],"L"
 	return
@@ -383,9 +381,7 @@ def tag_recent_unread_mails(email_id,token,white_list, social_list=[]):
 	# it will check mails only on the last 60 mins
 
 	old_time = token_store.get_last_updated_time_stamp(email_id)
-	# print time.strftime("%D %H:%M", time.localtime(int(old_time))), 
 	now_time = token_store.set_last_updated_time_stamp(email_id,0)
-	# print old_time, now_time
 	# now_time = helper.get_current_time_stamp()
 	# print time.strftime("%D %H:%M", time.localtime(int(now_time)))
 
