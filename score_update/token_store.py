@@ -269,7 +269,7 @@ def get_blacklist(email_id):
 		print 'Unable to get blacklist for email_id: '+email_id
 		# print response
 		return []
-	print response["blacklist"]
+	# print response["blacklist"]
 	return map(lambda x:str(x['email']),response["blacklist"])
 
 #uses prioritizer url
