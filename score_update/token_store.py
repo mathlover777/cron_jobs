@@ -269,7 +269,8 @@ def get_blacklist(email_id):
 		print 'Unable to get blacklist for email_id: '+email_id
 		# print response
 		return []
-	return map(lambda x:str(x),response["blacklist"])
+	print response["blacklist"]
+	return map(lambda x:str(x['email']),response["blacklist"])
 
 #uses prioritizer url
 def remove_from_new_blacklist(email_id, black_email):
