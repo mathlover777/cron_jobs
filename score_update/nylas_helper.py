@@ -1,3 +1,4 @@
+from BeautifulSoup import BeautifulSoup
 import nylas
 import helper
 import json
@@ -219,9 +220,10 @@ def add_thread_to_readnow(thread, label_flag, read_now_id, read_later_id):
 	#no need to update folders in case of read now. The mail remains in inbox
 	return
 
-def add_thread_to_clutter(thread, label_flag, clutter_id, inbox_id):
+def add_thread_to_clutter(thread, label_flag, clutter_id, inbox_id, read_now_id):
 	if(label_flag):
-		thread.remove_label(inbox_id)
+		# thread.remove_label(inbox_id)
+		thread.remove_label(read_now_id)
 		thread.add_label(clutter_id)
 	else:
 		thread.update_folder(clutter_id)
@@ -265,6 +267,34 @@ def contains_contact(email_id, participants):
 			return True
 	return False
 
+def get_clean_text(content):
+	content = re.sub(r'(<!DOCTYPE[^>]*>)|(&\S*;)|(https?:\/\/\S*)','', content, flags = re.MULTILINE)
+	content = ''.join(BeautifulSoup(content).findAll(text=lambda text: text.parent.name != "script" and text.parent.name != "style")).replace("\\n", " ")
+	return re.sub(r'[ ]+',' ',content)
+
+def has_html_content(ns, thread, threshold=0.5):
+	messages = []
+	clean_messages = []
+	for message_id in thread['message_ids']:
+		m = ns.messages.find(message_id)
+		messages.append(len(m['body']))
+		clean_messages.append(len(get_clean_text(m['body'])))
+
+	f_html = 1.0*sum(clean_messages)/sum(messages)
+
+	if f_html < threshold:
+		return True
+	# cleantext = get_clean_text()
+	return False
+
+def is_new_contact(ns, old_time, contact_email_id, thread):
+	oldthreads = ns.threads.where(**{'from':contact_email_id,'last_message_before':old_time})
+	if oldthreads.first() is None:
+		if has_html_content(ns, thread):
+			return False
+		return True
+	return False
+
 def is_spam_thread(thread, label_flag):
 	if label_flag:
 		labelnames = [label['name'] for label in thread['_labels']]
@@ -276,6 +306,9 @@ def is_spam_thread(thread, label_flag):
 			return True
 
 	return False
+
+def overlap(a, b):
+	return len(list(set(a) & set(b)))
 
 def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, social_list=[]):
 	client = nylas.APIClient(APP_ID, APP_SECRET, token)
@@ -322,29 +355,35 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 	for thread in recent_threads_list:
 		# TODO refactor using is_object_important
 		plist = get_other_participants_in_thread(thread,email_id)
-
+		# print plist
+		
 		blacklist = token_store.get_blacklist(email_id)
 		blacklist_flag = False
-		if(len(plist) == 1):
-			if(plist[0].lower() in blacklist):
-				blacklist_flag = True
+		if overlap(plist, blacklist) > 0:
+			blacklist_flag = True
 
 		if(blacklist_flag):
-			print 'INFO:', email_id, thread['id'], "B"
+			# print 'INFO:', email_id, thread['id'], "B"
 			add_thread_to_blacklist(thread, label_flag, blacklist_id)
 			continue
 
 		social_list_flag = is_social_mail(email_id, thread['subject'], thread['participants'], social_list)
-		white_list_flag = is_white_listed_mail(thread['subject'],white_list)
-		contact_flag = contains_contact(email_id, plist)
+
+		important_flag = is_white_listed_mail(thread['subject'],white_list)
+		if not important_flag:
+			important_flag = contains_contact(email_id, plist)
+		if not important_flag:
+			for p_id in plist:
+				important_flag = is_new_contact(ns, old_time-600, p_id, thread)
+				if important_flag:
+					break
 
 		score = 0.0
 		for participant in plist:
 			score += score_dict[participant.encode('ascii','ignore').lower()]
 
-		boolean_flags = white_list_flag or contact_flag
-
-		if score > 0 or boolean_flags:
+		if score > 0 or important_flag:
+			#TODO: check if the email is not marked as something else
 			add_thread_to_readnow(thread, label_flag, read_now_id, read_later_id)
 			# print 'INFO:',email_id, thread['id'],"N"
 		else:
@@ -352,9 +391,9 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 				# print 'INFO:',email_id,thread['id'],"S", 
 				add_thread_to_social(thread, label_flag, social_id)
 				continue
-			add_thread_to_clutter(thread, label_flag, read_later_id, inbox_id)
+			add_thread_to_clutter(thread, label_flag, read_later_id, inbox_id, read_now_id)
 			# tag_thread_given_condition(thread,label_flag,read_now_id,read_later_id,score,boolean_flags)
-			# print 'INFO:',email_id, thread['id'],"L"
+			print 'INFO:',email_id, thread['id'],"L"
 	return
 
 def get_nylas_client(token):
