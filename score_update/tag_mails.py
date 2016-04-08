@@ -21,7 +21,7 @@ def tag_new_mails_for_all_users():
 	return
 while True:
 	try:
-		send_daily_digest_to_all_users()
+		tag_new_mails_for_all_users()
 	except Exception as e:
 		print 'tagger crashed' + ' Exception : {' + str(e) + '}'
 		time.sleep(60)

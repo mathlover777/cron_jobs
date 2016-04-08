@@ -395,7 +395,7 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 				continue
 			add_thread_to_clutter(thread, label_flag, read_later_id, inbox_id, read_now_id)
 			# tag_thread_given_condition(thread,label_flag,read_now_id,read_later_id,score,boolean_flags)
-			print 'INFO:',email_id, thread['id'],"L"
+			# print 'INFO:',email_id, thread['id'],"L"
 	return
 
 def get_nylas_client(token):
