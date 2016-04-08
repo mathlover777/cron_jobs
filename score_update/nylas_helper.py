@@ -222,15 +222,17 @@ def add_thread_to_readnow(thread, label_flag, read_now_id, read_later_id):
 
 def add_thread_to_clutter(thread, label_flag, clutter_id, inbox_id, read_now_id):
 	if(label_flag):
-		# thread.remove_label(inbox_id)
 		thread.remove_label(read_now_id)
+		thread.remove_label(inbox_id)
 		thread.add_label(clutter_id)
 	else:
 		thread.update_folder(clutter_id)
 
-def add_thread_to_social(thread, label_flag, social_id):
+def add_thread_to_social(thread, label_flag, inbox_id, read_now_id, social_id):
 	if label_flag:
 		# use labels
+		thread.remove_label(read_now_id)
+		thread.remove_label(inbox_id)
 		thread.add_label(social_id)
 	else:
 		thread.update_folder(social_id)
@@ -389,7 +391,7 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 		else:
 			if(social_list_flag):
 				# print 'INFO:',email_id,thread['id'],"S", 
-				add_thread_to_social(thread, label_flag, social_id)
+				add_thread_to_social(thread, label_flag, inbox_id, read_now_id, social_id)
 				continue
 			add_thread_to_clutter(thread, label_flag, read_later_id, inbox_id, read_now_id)
 			# tag_thread_given_condition(thread,label_flag,read_now_id,read_later_id,score,boolean_flags)

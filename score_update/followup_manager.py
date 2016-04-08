@@ -28,8 +28,8 @@ def run_followup_manager_for_all_users():
 	# print user_list
 	# user_list = ['souravmathlover@gmail.com']
 	for email_id in user_list:
-		print '***************************'
-		print email_id
+		#print '***************************'
+		#print email_id
 		try:
 			run_followup_manager_for_user(email_id)
 		except Exception as e:
