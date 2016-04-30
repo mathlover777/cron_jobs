@@ -2,8 +2,16 @@ import nylas_helper
 import token_store
 import time
 
+source_2 = "nylas"
+source = "planck"
+use_psync = True
+
 def archive_blacklisted_mails(email_id):
-	token = token_store.get_token(email_id)
+	token = token_store.get_token(email_id, source)
+	if(token == ""):
+		token = token_store.get_token(email_id, source_2)
+		use_psync = False
+	nylas_helper.set_psync(use_psync)
 	nylas_helper.archive_old_blacklist_mails(email_id,token)
 	return
 

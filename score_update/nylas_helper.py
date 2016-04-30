@@ -9,12 +9,23 @@ import re
 
 # APP_ID = 'cow3ntxewcbvdvtulazbm2fwv'
 # APP_SECRET = '56m1p8lujvmxpf9w58vdrv8ed'
+use_psync = False
+
+PLANCK_APP_ID = '83fs5bk9kzm5pz3sq2gacsg2d'
+PLANCK_APP_SECRET = 'xjhwaych6ufut6xn77qp5kavp'
+psync_url = 'https://sync-dev.planckapi.com'
 
 APP_ID = '5girg6tjmjuenujbsg0lnatlq'
 APP_SECRET = '8fokx1yoht10ypwdgev3rqqlp'
 
+def set_psync(use_sync):
+	use_psync = use_sync
+
 def get_msg_count_in_range(future_time_stamp,past_time_stamp,email,token,direction):
-	client = nylas.APIClient(APP_ID, APP_SECRET, token)
+	if use_psync:
+		client = nylas.APIClient(PLANCK_APP_ID, PLANCK_APP_SECRET, token, api_server=psync_url)
+	else:
+		client = nylas.APIClient(APP_ID, APP_SECRET, token)
 	# print "get_msg_count_in_range"
 	# message_list = client.namespaces[0].messages.where(**{direction:email,'last_message_before' : future_time_stamp,\
 	# 	'last_message_after' : past_time_stamp})
@@ -35,11 +46,11 @@ def get_msg_count_in_range(future_time_stamp,past_time_stamp,email,token,directi
 		json.dump(sent_people_stat,fp = fp,indent = 4)
 	return sent_people_stat
 
-
-
-
 def get_thread_participant_score_with_tags(future_time_stamp,past_time_stamp,token,tag,self_email):
-	client = nylas.APIClient(APP_ID, APP_SECRET, token)
+	if use_psync:
+		client = nylas.APIClient(PLANCK_APP_ID, PLANCK_APP_SECRET, token, api_server=psync_url)
+	else:
+		client = nylas.APIClient(APP_ID, APP_SECRET, token)
 	# thread_list = client.namespaces[0].threads.where(**{'tag':tag,'last_message_before' : future_time_stamp,\
 	# 	'last_message_after' : past_time_stamp})
 
@@ -274,7 +285,7 @@ def get_clean_text(content):
 	content = ''.join(BeautifulSoup(content).findAll(text=lambda text: text.parent.name != "script" and text.parent.name != "style")).replace("\\n", " ")
 	return re.sub(r'[ ]+',' ',content)
 
-def has_html_content(ns, thread, threshold=0.5):
+def has_html_content(ns, thread, threshold=0.2):
 	messages = []
 	clean_messages = []
 	for message_id in thread['message_ids']:
@@ -313,7 +324,10 @@ def overlap(a, b):
 	return len(list(set(a) & set(b)))
 
 def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, social_list=[]):
-	client = nylas.APIClient(APP_ID, APP_SECRET, token)
+	if use_psync:
+		client = nylas.APIClient(PLANCK_APP_ID, PLANCK_APP_SECRET, token, api_server=psync_url)
+	else:
+		client = nylas.APIClient(APP_ID, APP_SECRET, token)
 	ns = client
 
 	recent_threads = ns.threads.where(**{'last_message_after':old_time-600,'last_message_before' :now_time, 'in':'inbox'})
@@ -399,7 +413,11 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 	return
 
 def get_nylas_client(token):
-	return nylas.APIClient(APP_ID, APP_SECRET, token)
+	if use_psync:
+		client = nylas.APIClient(PLANCK_APP_ID, PLANCK_APP_SECRET, token, api_server=psync_url)
+	else:
+		client = nylas.APIClient(APP_ID, APP_SECRET, token)
+	return client
 
 def is_object_important(delta_object,white_list,score_dict,other_participant_list):
 	
@@ -432,7 +450,10 @@ def tag_recent_unread_mails(email_id,token,white_list, social_list=[]):
 
 def archive_old_blacklist_mails(email_id, token):
 	blacklist = token_store.get_new_blacklist(email_id)
-	client = nylas.APIClient(APP_ID, APP_SECRET, token)
+	if use_psync:
+		client = nylas.APIClient(PLANCK_APP_ID, PLANCK_APP_SECRET, token, api_server=psync_url)
+	else:
+		client = nylas.APIClient(APP_ID, APP_SECRET, token)
 	ns = client
 	
 	label_flag = use_labels(ns)

@@ -143,8 +143,6 @@ def run_push_for_all_users():
 	# user_list = ['souravmathlover@gmail.com']
 	white_list = token_store.get_white_list()
 	for email_id in user_list:
-		print '***************************'
-		print email_id
 		try:
 			run_push_for_user(email_id,white_list)
 		except Exception as e:

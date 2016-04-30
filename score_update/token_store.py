@@ -9,8 +9,8 @@ prioritizer_url = 'http://planckapi-prioritizer.us-west-1.elasticbeanstalk.com'
 # base_url = 'http://127.0.0.1:8000'
 
 
-def get_token(email_id):
-	payload = {'email_id':email_id,'access_token':'planck_test'}
+def get_token(email_id, source="nylas"):
+	payload = {'email_id':email_id,'access_token':'planck_test', 'source': source}
 	url = base_url + '/server/get_token'
 	r = requests.post(url,data = payload)
 	response = r.json()

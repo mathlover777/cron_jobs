@@ -2,9 +2,16 @@ import nylas_helper
 import token_store
 import time
 
+source = "planck"
+source_2 = "nylas"
+use_psync = True
 
 def get_score_list_for_user(email_id):
-	token = token_store.get_token(email_id)
+	token = token_store.get_token(email_id, source)
+	if(token == ""):
+		token = token_store.get_token(email_id, source_2)
+		use_psync = False
+	nylas_helper.set_psync(use_psync)
 	score_list = nylas_helper.get_recent_contact_score(email_id,token)
 	return score_list
 

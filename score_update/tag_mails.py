@@ -2,8 +2,17 @@ import nylas_helper
 import token_store
 import time
 
+source = "planck"
+source_2 = "nylas"
+use_psync = True
+
 def tag_new_mails(email_id,white_list):
-	token = token_store.get_token(email_id)
+	token = token_store.get_token(email_id, source)
+	if(token == ""):
+		token = token_store.get_token(email_id, source_2)
+		use_psync = False
+	# print use_psync, token
+	nylas_helper.set_psync(use_psync)
 	nylas_helper.tag_recent_unread_mails(email_id,token,white_list,social_list)
 	return
 
