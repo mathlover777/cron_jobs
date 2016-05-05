@@ -16,7 +16,7 @@ def get_token(email_id, source="nylas"):
 	response = r.json()
 	# print response
 	if response['success'] != 'true':
-		print 'error'
+		# print 'error'
 		return ''
 	return response['token']
 

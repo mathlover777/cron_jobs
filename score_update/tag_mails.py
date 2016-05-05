@@ -5,6 +5,7 @@ import time
 source = "planck"
 source_2 = "nylas"
 use_psync = True
+social_list = ["linkedin","facebook","plus.google","twitter","meetup","tumblr","instagram","flickr","youtube","snapchat","stumbleupon","orkut","goodreads"]
 
 def tag_new_mails(email_id,white_list):
 	token = token_store.get_token(email_id, source)

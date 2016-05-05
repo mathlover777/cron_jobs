@@ -118,11 +118,9 @@ def get_deltas_to_push(email_id,token,all_delta_info_list,white_list):
 
 def run_push_for_user(email_id,white_list):
 	token = token_store.get_token(email_id)
-	print "token  : " + token
+	# print "token  : " + token
 	delta = get_delta(email_id,token)
-
 	# print delta
-
 	if len(delta) == 0 :
 		print "no delta to push"
 		return
