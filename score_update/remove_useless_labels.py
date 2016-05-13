@@ -7,7 +7,7 @@ source = "planck"
 source_2 = "nylas"
 psync_url = 'https://sync-dev.planckapi.com'
 
-remove_label = ['new_contact','read_later_by_user','read_now_by_user']
+remove_label = ['new_contact','read_later_by_user','read_now_by_user', 'Read Now']
 def remove_useless_labels(email_id):
 	try:
 		token = token_store.get_token(email_id, source)
