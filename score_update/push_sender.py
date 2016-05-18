@@ -38,13 +38,17 @@ def get_object_info(email_id,single_delta_object):
 	
 	return single_delta_info
 
-def get_info_from_delta_object(email_id,delta_list):
-	delta_info_list = [None] * len(delta_list)
+def get_info_from_delta_object(email_id, delta_list):
+	delta_info_list = [None for i in range(len(delta_list))]
 	i = 0 
 	for delta_object in delta_list:
-		delta_info_list[i] = get_object_info(email_id,delta_object)
+		delta_info_list[i] = get_object_info(email_id, delta_object)
 		i += 1
 	return delta_info_list
+
+def get_fresh_cursor(token):
+	r = requests.post('https://api.nylas.com/delta/latest_cursor', auth=(token, ''))
+	return r.json()["cursor"]
 
 def get_delta(email_id,token):
 	cursor_param = {}
@@ -58,31 +62,31 @@ def get_delta(email_id,token):
 	while True:
 		cursor_param["cursor"] = cursor
 		r = requests.get('https://api.nylas.com/delta', params = cursor_param, auth = (token, ''))
-		# print r
 		r_json = r.json()
+		# print r_json
 		cursor_start = r_json["cursor_start"]
 		cursor_end = r_json["cursor_end"]
 		delta_changes = delta_changes + r_json["deltas"]
 		
-		print cursor_start
-		print cursor_end
+		# print 'start',cursor_start
+		# print 'end',cursor_end
 
 		if cursor_start == cursor_end:
 		    break
 		cursor = cursor_end
-	if server_cursor != cursor:
-		token_store.store_cursor(email_id,cursor)
-		pass
+	# if server_cursor != cursor:
+	token_store.store_cursor(email_id,cursor)
 	return delta_changes
     
 def send_push_using_delta_info(email_id,delta_info):
 	title,body,data = get_push_content(delta_info)
+	print "ANDR_DEL: ",email_id
 	token_store.send_push_notification(email_id,title,body,data)
 	return
 
 def get_push_content(delta_info):
 
-	# print delta_info
+	# print 'delta_info', delta_info
 
 	push_data = {}
 	all_participant_list = reduce(lambda x,y:x + y,[x['participants'] for x in delta_info])
@@ -96,7 +100,7 @@ def get_push_content(delta_info):
 	data = {}
 	return title,body,data
 
-def get_deltas_to_push(email_id,token,all_delta_info_list,white_list):
+def get_deltas_to_push(email_id, token, all_delta_info_list, white_list):
 	# print all_delta_info_list
 	delta_info_list = filter(lambda x:x["unread"],all_delta_info_list)
 	request_set = set([])
@@ -106,37 +110,37 @@ def get_deltas_to_push(email_id,token,all_delta_info_list,white_list):
 		for participant in plist:
 			request_set.add(participant["email"])
 	score_dict = token_store.get_contact_score_list(email_id,list(request_set))
-
+	blacklist = token_store.get_blacklist(email_id)
+	old_time = token_store.get_last_updated_time_stamp(email_id)
 	# print score_dict
 
-	good_deltas = filter( lambda x:nylas_helper.is_object_important(x,white_list,score_dict,[y['email'] for y in x['participants']]) , delta_info_list)
-	
-
+	good_deltas = filter( lambda x:nylas_helper.is_object_important(x, blacklist, old_time, email_id, white_list,score_dict,[y['email'] for y in x['participants']]) , delta_info_list)
 	# print good_deltas
 
 	return good_deltas
 
-def run_push_for_user(email_id,white_list):
+def run_push_for_user(email_id, white_list):
 	token = token_store.get_token(email_id)
-	# print "token  : " + token
+	print "token:", token
 	delta = get_delta(email_id,token)
 	# print delta
 	if len(delta) == 0 :
-		print "no delta to push"
+		print "NODEL",email_id
 		return
 	# we have got some changes
-	delta_info_list = get_info_from_delta_object(email_id,delta)
-	deltas_to_push = get_deltas_to_push(email_id,token,delta_info_list,white_list)
+	delta_info_list = get_info_from_delta_object(email_id, delta)
+	deltas_to_push = get_deltas_to_push(email_id, token, delta_info_list, white_list)
 	if(len(deltas_to_push) > 0):
-		print "push to send !"
+		# print "push to send !"
 		send_push_using_delta_info(email_id,deltas_to_push)
 	else:
-		print "no delta to push"
+		print "NODEL: ",email_id
 	return
 
 
 def run_push_for_all_users():
 	user_list = token_store.get_email_prio_users()
+	# user_list = ['kumar.sachin52@gmail.com', 'souravmathlover@gmail.com', 'rajesh.x.kumar@gmail.com']
 	# print user_list
 	# user_list = ['souravmathlover@gmail.com']
 	white_list = token_store.get_white_list()
@@ -151,10 +155,11 @@ def run_push_for_all_users():
 # run_push_for_all_users()
 
 while True:
-	try:
-		run_push_for_all_users()
-	except Exception as e:
-		print 'push crashed !' + ' Exception : {' + str(e) + '}'
+	# try:
+	run_push_for_all_users()
+	print "##done##"
+	# except Exception as e:
+		# print 'push crashed !' + ' Exception : {' + str(e) + '}'
 	# quit()
 	time.sleep(100)
 

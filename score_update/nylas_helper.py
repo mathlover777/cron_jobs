@@ -423,20 +423,32 @@ def get_nylas_client(token):
 		client = nylas.APIClient(APP_ID, APP_SECRET, token)
 	return client
 
-def is_object_important(delta_object,white_list,score_dict,other_participant_list):
+def is_object_important(delta_object, blacklist, old_time, email_id, white_list, score_dict, other_participant_list):
 	
 	# print score_dict
 	# print other_participant_list
 
-	white_list_flag = is_white_listed_mail(delta_object['subject'],white_list)
+	#######
+	blacklist_flag = False
+	if overlap(other_participant_list, blacklist) > 0:
+		return False #blacklisted mail
+
+	important_flag = is_white_listed_mail(delta_object['subject'],white_list)
+	if not important_flag:
+		important_flag = contains_contact(email_id, other_participant_list)
+	# if not important_flag:
+	# 	important_flag = contains_important_contact(email_id, other_participant_list)
+	if important_flag:
+		return True
+
 	score = 0.0
 	for participant in other_participant_list:
-		score += score_dict[participant.encode('ascii','ignore').lower()]	
-	boolean_flags = white_list_flag
-	if(boolean_flags or score > 0.0):
-		# its a good object
+		score += score_dict[participant.encode('ascii','ignore').lower()]
+
+	if score > 0:
 		return True
-	return False
+	else:
+		return False
 
 def tag_recent_unread_mails(email_id,token,white_list, social_list=[]):
 	# this will retrieve the all unread threads

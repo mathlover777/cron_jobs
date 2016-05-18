@@ -120,7 +120,7 @@ def get_cursor(email_id,token):
 
 	response = r.json()
 
-	print response
+	# print response
 
 	# quit()
 	if response['success'] != 'true':
