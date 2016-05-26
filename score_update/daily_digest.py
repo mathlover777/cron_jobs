@@ -30,7 +30,7 @@ def send_daily_digest_to_all_users(nowtime):
 
 	# user_list = token_store.get_email_prio_users()
 	user_list = ['kumar.sachin52@gmail.com', 'rajesh.x.kumar@gmail.com']
-	print user_list
+	# print user_list
 	digest_times = token_store.get_daily_digest_time(user_list)
 	timezones = token_store.get_timezones(user_list)
 	for i in range(len(user_list)):
@@ -43,8 +43,8 @@ def send_daily_digest_to_all_users(nowtime):
 
 			dt = digest_time.hour*60+digest_time.minute
 			tzt = tztime.hour*60+tztime.minute
-			print tztime, digest_time
-			if abs(dt-tzt) <= 30: #if the current time and time of daily digest are 30 minutes apart, then send the daily digest
+			# print tztime, digest_time
+			if dt-tzt <= 30: #if the current time and time of daily digest are 30 minutes apart, then send the daily digest
 				print "Preparing to send daily digest to",user
 				send_daily_digest(user, digestclient)
 				print 'Sent the digest to',user

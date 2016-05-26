@@ -547,6 +547,8 @@ def create_html_digest(email_id, displayname, clutterthreads, socialthreads):
 def create_html_digest_for_label(email_id, threads, label, soup):
 	
 	threadtable = soup.find('table',{'id':label+'table'})
+	import os 
+	print os.getcwd()
 	threadentrytemplate = open("html_templates/thread.html").read()
 	count = 0
 	for thread in threads:
