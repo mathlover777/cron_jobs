@@ -290,3 +290,57 @@ def get_contact(email_id, contact_email_id):
 		return None
 	else:
 		return response['contact_json']
+
+def get_daily_digest_time(user_list):
+	user_list_string = ';'.join( map(lambda x:str(x.encode('ascii','encode')), user_list))
+	payload = {'email_id':user_list_string}
+	url = base_url + '/server/get_daily_digest_time'
+	r = requests.post(url,data = payload)
+	response = r.json()
+
+	if response['success'] != 'true':
+		print 'unable to get daily digest time for this session !'
+		# print response
+		return []
+	dtimes = map(lambda x:str(x),response["time"].split(";"))
+	import datetime
+	digest_time = [datetime.datetime.strptime(x,"%H:%M").time() if x != "" else datetime.time(21,0) for x in dtimes]
+	return digest_time
+
+def get_timezones(user_list):
+	user_list_string = ';'.join(map(lambda x:str(x.encode('ascii','encode')), user_list))
+	payload = {'email_id':user_list_string}
+	url = base_url + '/server/get_timezone'
+	r = requests.post(url,data = payload)
+	response = r.json()
+	if response['success'] != 'true':
+		print 'unable to get timezones for this session !'
+		# print response
+		return ['UTC' for user in user_list]
+	tz = map(lambda x:str(x),response["timezone"].split(";"))
+	timezones = [timezone if timezone != "" else "UTC" for timezone in tz]
+	return timezones
+
+def get_last_digest_time_stamp(email_id):
+	payload = {'email_id':email_id}
+	url = base_url + '/server/get_last_digest_time_stamp'
+	r = requests.post(url,data = payload)
+	response = r.json()
+	# print response
+	if response['success'] != 'true':
+		print response
+		return helper.get_old_time_stamp(1)
+	return int(response['time_stamp'])
+
+def set_last_digest_time_stamp(email_id,time_stamp):
+	payload = {'email_id':email_id,'last_digest_time':time_stamp}
+	url = base_url + '/server/set_last_digest_time_stamp'
+	r = requests.post(url,data = payload)
+	response = r.json()
+	if response['success'] != 'true':
+		print 'unable to update !'
+		print response
+	else:
+		# print 'update successful'
+		pass
+	return int(response['now_time'])

@@ -18,8 +18,13 @@ psync_url = 'https://sync-dev.planckapi.com'
 APP_ID = '5girg6tjmjuenujbsg0lnatlq'
 APP_SECRET = '8fokx1yoht10ypwdgev3rqqlp'
 
+digest_client_email = 'eva@plancklabs.com'
+planck_mails = set([digest_client_email])
+
 def set_psync(use_sync):
 	use_psync = use_sync
+
+####Functions for Score update of users for prioritization####
 
 def get_msg_count_in_range(future_time_stamp,past_time_stamp,email,token,direction):
 	if use_psync:
@@ -176,6 +181,8 @@ def get_recent_contact_score(email_id,token):
 	score_list = compute_primitive_score(email_id)
 	return score_list
 
+####Functions for email prioritizer####
+
 def get_other_participants_in_thread(thread,email_id):
 	# print thread
 	participants = [x['email'] for x in thread['participants']]
@@ -254,6 +261,9 @@ def add_thread_to_blacklist(thread, label_flag, blacklist_id):
 		thread.update_labels([blacklist_id])
 	else:
 		thread.update_folder(blacklist_id)
+
+def is_from_planck(participants):
+	return len(planck_mails.intersection(set(participants))) > 0
 
 def is_white_listed_mail(subject_line,white_list):
 	subject_line = subject_line.lower()
@@ -389,7 +399,9 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 
 		social_list_flag = is_social_mail(email_id, thread['subject'], thread['participants'], social_list)
 
-		important_flag = is_white_listed_mail(thread['subject'],white_list)
+		important_flag = is_from_planck(plist)
+		if not important_flag:
+			important_flag = is_white_listed_mail(thread['subject'],white_list)
 		if not important_flag:
 			important_flag = contains_contact(email_id, plist)
 		if not important_flag:
@@ -423,6 +435,27 @@ def get_nylas_client(token):
 		client = nylas.APIClient(APP_ID, APP_SECRET, token)
 	return client
 
+def get_nylas_client_(token, psync_use):
+	if psync_use:
+		client = nylas.APIClient(PLANCK_APP_ID, PLANCK_APP_SECRET, token, api_server=psync_url)
+	else:
+		client = nylas.APIClient(APP_ID, APP_SECRET, token)
+	return client
+
+def tag_recent_unread_mails(email_id,token,white_list, social_list=[]):
+	# this will retrieve the all unread threads
+	# now depending on the people involved in the thread other than the current
+	# it will check mails only on the last 60 mins
+
+	old_time = token_store.get_last_updated_time_stamp(email_id)
+	now_time = token_store.set_last_updated_time_stamp(email_id,0)
+	# now_time = helper.get_current_time_stamp()
+	# print time.strftime("%D %H:%M", time.localtime(int(now_time)))
+
+	tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, social_list)
+
+####Used in Push Notification####
+
 def is_object_important(delta_object, blacklist, old_time, email_id, white_list, score_dict, other_participant_list):
 	
 	# print score_dict
@@ -433,7 +466,9 @@ def is_object_important(delta_object, blacklist, old_time, email_id, white_list,
 	if overlap(other_participant_list, blacklist) > 0:
 		return False #blacklisted mail
 
-	important_flag = is_white_listed_mail(delta_object['subject'],white_list)
+	important_flag = is_from_planck(other_participant_list)
+	if not important_flag:
+		important_flag = is_white_listed_mail(delta_object['subject'],white_list)
 	if not important_flag:
 		important_flag = contains_contact(email_id, other_participant_list)
 	# if not important_flag:
@@ -450,19 +485,7 @@ def is_object_important(delta_object, blacklist, old_time, email_id, white_list,
 	else:
 		return False
 
-def tag_recent_unread_mails(email_id,token,white_list, social_list=[]):
-	# this will retrieve the all unread threads
-	# now depending on the people involved in the thread other than the current
-	# it will check mails only on the last 60 mins
-
-	old_time = token_store.get_last_updated_time_stamp(email_id)
-	now_time = token_store.set_last_updated_time_stamp(email_id,0)
-	# now_time = helper.get_current_time_stamp()
-	# print time.strftime("%D %H:%M", time.localtime(int(now_time)))
-
-	tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, social_list)
-	
-	return
+####Add to Blacklist triggers this####
 
 def archive_old_blacklist_mails(email_id, token):
 	blacklist = token_store.get_new_blacklist(email_id)
@@ -490,3 +513,100 @@ def archive_old_blacklist_mails(email_id, token):
 				message.update_folder(blacklist_id)
 
 		token_store.remove_from_new_blacklist(email_id, black_email)
+
+####Daily Digest Functions####
+
+def get_sender_string(email_id, participants):
+	partlist = []
+	for participant in participants:
+		if(participant['email'] == email_id):
+			continue
+		if participant['name'] == "":
+			partlist.append(participant['email'])
+		else:
+			partlist.append(participant['name'])
+
+	if len(partlist) == 0:
+		partlist.append("me")
+	if len(partlist) > 4:
+		partlist = partlist[:4]
+		partlist.append("...")
+	return ", ".join(partlist)
+
+def create_html_digest(email_id, displayname, clutterthreads, socialthreads):
+	htmltemplatetext = open("html_templates/dailydigest.html").read()
+	soup = BeautifulSoup(htmltemplatetext)
+	soup = create_html_digest_for_label(email_id, clutterthreads, 'readlater', soup)
+	soup = create_html_digest_for_label(email_id, socialthreads, 'social', soup)
+
+	displaynametag = soup.find('span', {'id':'username'})
+	displaynametag.contents[0].replaceWith(" "+displayname)
+
+	return str(soup)
+
+def create_html_digest_for_label(email_id, threads, label, soup):
+	
+	threadtable = soup.find('table',{'id':label+'table'})
+	threadentrytemplate = open("html_templates/thread.html").read()
+	count = 0
+	for thread in threads:
+		# print 'thread '+label, count
+		threadsoup = BeautifulSoup(threadentrytemplate)
+		threadtag = threadsoup.first()
+
+		subject = thread['subject']
+		outline = thread['snippet']
+		sender = get_sender_string(email_id, thread['participants'])
+
+		sendertag = threadtag.find('td',{'id':'sender'})
+		sendertag.contents[0].replaceWith(sender)
+
+		subjecttag = threadtag.find('td',{'id':'subject'})
+		subjecttag.contents[0].replaceWith(subject)		
+
+		outlinetag = threadtag.find('td',{'id':'outline'})
+		outlinetag.contents[0].replaceWith(outline)
+
+		threadtable.append(threadtag)
+		count += 1
+
+	if count > 0:
+		labelcounttag = soup.find('span', {'id':label+'number'})
+		labelcounttag.contents[0].replaceWith(" ("+str(count)+")")
+
+	return soup		
+
+def get_mails_by_time_range(old_time, now_time, ns, label):
+	
+	label_flag = use_labels(ns)
+	recent_threads = ns.threads.where(**{'last_message_after':old_time,'last_message_before' :now_time, 'in':label})
+	return recent_threads
+
+def send_daily_digest(email_id, token, use_psync, digest_client):
+	##highest priority
+	old_time = token_store.get_last_digest_time_stamp(email_id)
+	now_time = token_store.set_last_digest_time_stamp(email_id,0)
+	# old_time = 1463993731
+	# now_time = 1464065731
+	print old_time, now_time
+	
+	ns = get_nylas_client_(token, use_psync)
+	cluttermails = get_mails_by_time_range(old_time, now_time, ns, "Read Later")
+	socialmails = get_mails_by_time_range(old_time, now_time, ns, "Social")
+
+	accountinfo = ns.account
+	displayname = accountinfo['name']
+	if displayname == "":
+		displayname = email_id
+	# print 'D',displayname
+
+	digestbody = create_html_digest(email_id, displayname, cluttermails, socialmails)
+	# print 'D',digestbody[:10]
+	digest_draft = digest_client.drafts.create()
+
+	digest_draft.to =  [{'email':email_id}]
+	digest_draft.subject = '[Planck Digest] Messages for you to review'
+	digest_draft.body = digestbody
+	# raw_input("send?")
+	digest_draft.send()
+	# print "sent"
