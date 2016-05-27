@@ -44,7 +44,7 @@ def send_daily_digest_to_all_users(nowtime):
 			dt = digest_time.hour*60+digest_time.minute
 			tzt = tztime.hour*60+tztime.minute
 			# print tztime, digest_time
-			if dt-tzt <= 30: #if the current time and time of daily digest are 30 minutes apart, then send the daily digest
+			if dt-tzt < 30 and dt-tzt >= 0: #if the current time and time of daily digest are 30 minutes apart, then send the daily digest
 				print "Preparing to send daily digest to",user
 				send_daily_digest(user, digestclient)
 				print 'Sent the digest to',user

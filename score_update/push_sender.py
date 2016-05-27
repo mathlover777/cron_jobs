@@ -78,7 +78,7 @@ def get_delta(email_id,token):
 	token_store.store_cursor(email_id,cursor)
 	return delta_changes
     
-def send_push_using_delta_info(email_id,delta_info):
+def send_push_using_delta_info(email_id, delta_info):
 	title,body,data = get_push_content(delta_info)
 	print "ANDR_DEL: ",email_id
 	token_store.send_push_notification(email_id,title,body,data)
@@ -93,9 +93,12 @@ def get_push_content(delta_info):
 	
 	unique_first_name_list = list(set([x['name'].split()[0] for x in all_participant_list]))
 
-	first_name_list = ','.join(unique_first_name_list)
+	first_name_list = ', '.join(unique_first_name_list)
 	
-	title = "Important Mails from"
+	title = "Important Message(s) from"
+	if len(delta_info) > 0:
+		title = str(len(delta_info))+" "+title
+
 	body = first_name_list
 	data = {}
 	return title,body,data
