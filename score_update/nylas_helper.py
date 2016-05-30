@@ -14,6 +14,7 @@ use_psync = False
 PLANCK_APP_ID = '83fs5bk9kzm5pz3sq2gacsg2d'
 PLANCK_APP_SECRET = 'xjhwaych6ufut6xn77qp5kavp'
 psync_url = 'https://sync-dev.planckapi.com'
+nylas_url = 'https://api.nylas.com'
 
 APP_ID = '5girg6tjmjuenujbsg0lnatlq'
 APP_SECRET = '8fokx1yoht10ypwdgev3rqqlp'
@@ -547,8 +548,6 @@ def create_html_digest(email_id, displayname, clutterthreads, socialthreads):
 def create_html_digest_for_label(email_id, threads, label, soup):
 	
 	threadtable = soup.find('table',{'id':label+'table'})
-	import os 
-	print os.getcwd()
 	threadentrytemplate = open("html_templates/thread.html").read()
 	count = 0
 	for thread in threads:
@@ -579,8 +578,6 @@ def create_html_digest_for_label(email_id, threads, label, soup):
 	return soup		
 
 def get_mails_by_time_range(old_time, now_time, ns, label):
-	
-	label_flag = use_labels(ns)
 	recent_threads = ns.threads.where(**{'last_message_after':old_time,'last_message_before' :now_time, 'in':label})
 	return recent_threads
 
@@ -590,7 +587,7 @@ def send_daily_digest(email_id, token, use_psync, digest_client):
 	now_time = token_store.set_last_digest_time_stamp(email_id,0)
 	# old_time = 1463993731
 	# now_time = 1464065731
-	print old_time, now_time
+	# print old_time, now_time
 	
 	ns = get_nylas_client_(token, use_psync)
 	cluttermails = get_mails_by_time_range(old_time, now_time, ns, "Read Later")
@@ -612,3 +609,62 @@ def send_daily_digest(email_id, token, use_psync, digest_client):
 	# raw_input("send?")
 	digest_draft.send()
 	# print "sent"
+
+###Counting mails from contacts###
+
+def is_blacklisted(message, use_label):
+	if use_label:
+		for label in message['_labels']:
+			if label['display_name'] == 'Black Hole':
+				return True
+	else:
+		if message['_folder']['display_name'] == 'Black Hole':
+			return True
+	return False
+
+def count_contact_wise_mails(email_id, token, use_psync):
+
+	ns = get_nylas_client_(token, use_psync)
+
+	old_time = token_store.get_last_mail_count_timestamp(email_id)
+	now_time = int(time.time())
+	print old_time, now_time
+	epoch = 631152000
+	from collections import defaultdict
+	count = defaultdict(int)
+	if old_time == epoch:
+		# raw_input('first time '+email_id)
+		import requests
+		contacts = ns.contacts
+		for contact in ns.contacts:
+			url = nylas_url
+			if use_psync:
+				url = psync_url
+			r = requests.get(url+"/messages?from="+contact['email']+"&view=count", auth=(token, ""))
+			result = r.json()
+			count[contact['email']] = result['count']
+			print result
+
+	else:
+		# raw_input('next time '+email_id)
+		use_label = use_labels(ns)
+		recent_messages = ns.messages.where(**{'last_message_after':old_time,'last_message_before' :now_time})
+		for message in recent_messages:
+			if not is_blacklisted(message, use_label):
+				for contact in message['from']:
+					if contact['email'] != "":
+						count[contact['email']] += 1
+
+	print count
+	contacts = []
+	counts = []
+	for email in count.keys():
+		if count[email] > 0:
+			contacts.append(email)
+			counts.append(str(count[email]))
+	if len(contacts) > 0:
+		token_store.update_contact_mail_counts(email_id, contacts, counts)
+	now_time = token_store.set_last_mail_count_timestamp(email_id,now_time)
+	print 'updated'
+
+

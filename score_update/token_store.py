@@ -7,14 +7,15 @@ base_url = 'http://planckapi-dev.elasticbeanstalk.com'
 prioritizer_url = 'http://planckapi-prioritizer.us-west-1.elasticbeanstalk.com'
 # base_url = 'http://token-store-dev.elasticbeanstalk.com'
 # base_url = 'http://127.0.0.1:8000'
-
+epoch = 631152000
 
 def get_token(email_id, source="nylas"):
 	payload = {'email_id':email_id,'access_token':'planck_test', 'source': source}
 	url = base_url + '/server/get_token'
 	r = requests.post(url,data = payload)
+	# print r
 	response = r.json()
-	# print response
+	
 	if response['success'] != 'true':
 		# print 'error'
 		return ''
@@ -344,3 +345,41 @@ def set_last_digest_time_stamp(email_id,time_stamp):
 		# print 'update successful'
 		pass
 	return int(response['now_time'])
+
+def get_last_mail_count_timestamp(email_id):
+	payload = {'email_id':email_id}
+	url = base_url + '/server/get_last_mail_count_timestamp'
+	r = requests.post(url,data = payload)
+	response = r.json()
+	# print response
+	if response['success'] != 'true':
+		# print response
+		return epoch #Jan 1, 1990, Assuming current email clients didn't exist earlier
+		# return helper.get_old_time_stamp_by_minute(60)
+	return int(response['time_stamp'])
+
+def set_last_mail_count_timestamp(email_id,time_stamp):
+	payload = {'email_id':email_id,'last_mail_count_time':time_stamp}
+	url = base_url + '/server/set_last_mail_count_timestamp'
+	r = requests.post(url,data = payload)
+	response = r.json()
+	if response['success'] != 'true':
+		print 'unable to update !'
+		print response
+	else:
+		# print 'update successful'
+		pass
+	return int(response['now_time'])
+
+def update_contact_mail_counts(email_id, contacts, counts):
+	contact_string = ";".join(contacts)
+	count_string = ";".join(counts)
+	payload = {'email_id':email_id, 'contact_email_id':contact_string, 'counts':count_string}
+
+	url = base_url + "/server/update_contact_mail_counts"
+	r = requests.post(url, data=payload)
+	response = r.json()
+
+	if(response['success'] != 'true'):
+		print 'unable to update contact count ',email_id
+		print response
