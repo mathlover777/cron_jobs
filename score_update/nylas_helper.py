@@ -640,10 +640,12 @@ def count_contact_wise_mails(email_id, token, use_psync):
 			url = nylas_url
 			if use_psync:
 				url = psync_url
-			r = requests.get(url+"/messages?from="+contact['email']+"&view=count", auth=(token, ""))
-			result = r.json()
-			count[contact['email']] = result['count']
-			print result
+			if contact['email'] is not None:
+				r = requests.get(url+"/messages?from="+contact['email']+"&view=count", auth=(token, ""))
+				result = r.json()
+				count[contact['email']] = result['count']
+				print contact['email']
+
 
 	else:
 		# raw_input('next time '+email_id)
