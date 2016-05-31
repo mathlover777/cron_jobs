@@ -583,11 +583,11 @@ def get_mails_by_time_range(old_time, now_time, ns, label):
 
 def send_daily_digest(email_id, token, use_psync, digest_client):
 	##highest priority
-	# old_time = token_store.get_last_digest_time_stamp(email_id)
-	# now_time = token_store.set_last_digest_time_stamp(email_id,0)
-	old_time = 1463993731
-	now_time = 1464065731
-	print old_time, now_time
+	old_time = token_store.get_last_digest_time_stamp(email_id)
+	now_time = token_store.set_last_digest_time_stamp(email_id,0)
+	# old_time = 1463993731
+	# now_time = 1464065731
+	# print old_time, now_time
 	
 	ns = get_nylas_client_(token, use_psync)
 	cluttermails = get_mails_by_time_range(old_time, now_time, ns, "Read Later")
