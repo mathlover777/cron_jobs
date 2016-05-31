@@ -634,8 +634,10 @@ def count_contact_wise_mails(email_id, token, use_psync):
 	count = defaultdict(int)
 	if old_time == epoch:
 		# raw_input('first time '+email_id)
+		print "First time of",email_id
 		import requests
 		contacts = ns.contacts
+		cc = 0
 		for contact in ns.contacts:
 			url = nylas_url
 			if use_psync:
@@ -644,7 +646,9 @@ def count_contact_wise_mails(email_id, token, use_psync):
 				r = requests.get(url+"/messages?from="+contact['email']+"&view=count", auth=(token, ""))
 				result = r.json()
 				count[contact['email']] = result['count']
-				print contact['email']
+				cc+=1
+			if cc%100==0:
+				print cc
 
 
 	else:
@@ -657,7 +661,9 @@ def count_contact_wise_mails(email_id, token, use_psync):
 					if contact['email'] != "":
 						count[contact['email']] += 1
 
-	print count
+	# print count
+	if len(count) > 0:
+		print 'counts calculated'
 	contacts = []
 	counts = []
 	for email in count.keys():
