@@ -645,8 +645,9 @@ def count_contact_wise_mails(email_id, token, use_psync):
 			if contact['email'] is not None:
 				r = requests.get(url+"/messages?from="+contact['email']+"&view=count", auth=(token, ""))
 				result = r.json()
-				count[contact['email']] = result['count']
-				cc+=1
+				if result.has_key('count'):
+					count[contact['email']] = result['count']
+					cc+=1
 			if cc%100==0:
 				print cc
 
@@ -660,7 +661,7 @@ def count_contact_wise_mails(email_id, token, use_psync):
 				for contact in message['from']:
 					if contact['email'] != "":
 						count[contact['email']] += 1
-
+	print 'counts done'
 	# print count
 	if len(count) > 0:
 		print 'counts calculated'

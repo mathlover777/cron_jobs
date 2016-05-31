@@ -3,22 +3,62 @@
 <head>
 	<title>Planck Daily Digest</title>
 </head>
-<body>
-<div style='display:table; width:100%; height:100px; background-color:#5AC4B4;'><span style="display:table-cell; vertical-align:middle; text-align:center; color:white; font-size:200%;">Unimportant and Unread Emails Digest</span></div>
+<body style="background-color:#d9d9d9;">
+<div style='display:table; width:75vw; height:2vh; background-color:#5AC4B4; font-size:6vmin; margin:auto; box-shadow:0 1vmin 2vmin 0 rgba(0,0,0,0.15);'><span style="padding:2vw; display:table-cell; vertical-align:middle; text-align:center; color:white;">Unimportant and Unread Emails Digest</span></div>
+
+<div style='width:100%; height:1vh;'></div>
+
+<div style='width:100%;'><div style=" width:75vw; display:table; margin:auto; background-color:white; box-shadow:0 1vmin 2vmin 0 rgba(0,0,0,0.15);"><div style="display:table; width:100%; overflow:wrap; margin:auto; font-size:2.5vmin;"><div style="padding:2vmin"><span>Hi<span id='username'> [Name]</span>, Here's a summary of all the unimportant mails you received since your last digest. You can also find them in your "Read Later" and "Social" folders and move them to your inbox (or unsubscribe from them) which will help train our system.<br /></span></div></div></div></div>
+
+<div style='width:100%; height:1vh;'></div>
+
+<div style='width:100%;'><div style="display:table; margin:auto; height:100%; width:75vw; background-color:white; box-shadow:0 1vmin 2vmin 0 rgba(0,0,0,0.15);"><table style="width:100%; height:100%; margin:auto;"><tr style=""><td style="width:33%; padding:4px; "><button style="width:100%; height:100%; padding:5px; background:none; border:none; color:#5AC4B4; font-size:3vmin;">Mark All as Read</button></td><td style="width:33%; padding:4px; "><button style="width:100%; padding:5px; background:none; border:none; color:#5AC4B4; font-size:3vmin;">Archive All</button></td><td style="width:33%; padding:4px; "><button style="width:100%; padding:5px; background:none; border:none; color:#5AC4B4; font-size:3vmin">Delete All</button></td></tr></table></div></div>
+
+<div style='width:100%; height:1vh;'></div>
+
+<div style='width:100%;'><div style="width:75vw; margin:auto; border:none;">
+<table style="width:100%; border-spacing:0; border-collapse:collapse; padding:0; box-shadow:0 1vmin 2vmin 0 rgba(0,0,0,0.15); " id='readlatertable'><thead style="width:100%; background-color:#5AC4B4;"><td style='padding:2vmin; color:white; font-size:3vmin;'>Read Later <span id='readlaternumber'>()</span></td></thead>
+
+<tr><td style='padding:2vmin; padding-bottom:0; width:100%; background-color:white; box-shadow:0 1vmin 2vmin 0 rgba(0,0,0,0.15);' class='newthread'>
+	<table style="width:100%; border-spacing:0; border-collapse: collapse;"><tr><td id='sender'>sender@example.com</td></tr><tr><td style="font-weight:bold" id='subject'>This is subject</td></tr>
+	<tr style="width:100%"><td>
+		<table style="width:100% ">
+		<tr>
+		<td style="width:70%; background-color:red;" id='outline'>This is the outline ... </td>
+		<td style="width:30%; background-color:yellow;">
+			<table style="border-spacing:0; border-collapse: collapse;"><tr style=""><td style="width:33%;"><button style="width:100%; padding:0.5vmin; background:none; border:1px solid #5AC4B4; border-radius:0.5vmin; color:#5AC4B4; font-size:2.2vmin">Inbox now</button></td><td style="width:33%;"><button style="width:100%; padding:0.5vmin; background:none; border:1px solid #5AC4B4; border-radius:0.5vmin; color:#5AC4B4; font-size:2.2vmin">Inbox Always</button></td><td style="width:33%;"><button style="width:100%; padding:0.5vmin; background:none; border:1px solid #5AC4B4; border-radius:0.5vmin; color:#5AC4B4; font-size:2.2vmin">Unsubscribe</button></td></tr></table>
+		</td>
+		</tr>
+		</table>
+	</td></tr>
+	</table><hr style='margin:0; border:0; background-color:#5AC4B4; height:1px;'>
+</td></tr>
+
+<tr><td style='padding:10px; padding-bottom:0; width:100%; background-color:white; box-shadow:0 1vmin 2vmin 0 rgba(0,0,0,0.15);' class='newthread'>
+	<table style="width:100%; border-spacing:0; border-collapse: collapse;"><tr><td id='sender'>sender@example.com</td></tr><tr><td style="font-weight:bold" id='subject'>This is subject</td></tr>
+	<tr style="width:100%"><td>
+		<table style="width:100% border-spacing:0; border-collapse: collapse;">
+		<tr>
+		<td style="width:70%" id='outline'>This is the outline ... </td>
+		<td style="width:30%;">
+			<table style="border-spacing:0; border-collapse: collapse;"><tr style=""><td style="width:33%;"><button style="width:100%; padding:2px; background:none; border:1px solid #5AC4B4; border-radius:4px; color:#5AC4B4;">Inbox now</button></td><td style="width:33%;"><button style="width:100%; padding:2px; background:none; border:1px solid #5AC4B4; border-radius:4px; color:#5AC4B4;">Inbox Always</button></td><td style="width:33%;"><button style="width:100%; padding:2px; background:none; border:1px solid #5AC4B4; border-radius:4px; color:#5AC4B4;">Unsubscribe</button></td></tr></table>
+		</td>
+		</tr>
+		</table>
+	</td></tr>
+	</table><hr style='margin:0; border:0; background-color:#5AC4B4; height:1px;'>
+</td></tr>
+</table></div></div>
 <div style='width:100%; height:10px;'></div>
-<div style='width:100%; height:50px;'><div style="display:table; width:70%; height:90%; margin:auto;"><span>Hi<span id='username'>[Name]</span>, Here's a summary of all the unimportant mails you received since your last digest. You can also find them in your "Read Later" and "Social" folders and move them to your inbox (and vice versa) which will help train our system.</span></div></div>
-<div style='width:100%; height:50px;'><table style="width:70%; height:90%; margin:auto;"><tr style=""><td style="width:33%; padding:4px;"><button style="width:100%; padding:5px; background:none; border:1px solid #5AC4B4; border-radius:4px; color:#5AC4B4; font-size:120%;">Mark All as Read</button></td><td style="width:33%; padding:4px;"><button style="width:100%; padding:5px; background:none; border:1px solid #5AC4B4; border-radius:4px; color:#5AC4B4; font-size:120%;">Archive All</button></td><td style="width:33%; padding:4px;"><button style="width:100%; padding:5px; background:none; border:1px solid #5AC4B4; border-radius:4px; color:#5AC4B4; font-size:120%;">Delete All</button></td></tr></table></div>
-<div style='width:100%; height:10px;'></div>
-<div style='width:100%;'><div style="width:70%; height:90%; margin:auto;">
-<table style="width:100%;" id='readlatertable'><thead style="width:100%; background-color:#5AC4B4;"><td style='padding:10px; color:white;'>Read Later <span id='readlaternumber'>()</span></td></thead></table></div></div>
-<div style='width:100%; height:10px;'></div>
-<div style='width:100%;'><div style="width:70%; height:90%; margin:auto;">
-<table style="width:100%;" id='socialtable'><thead style="width:100%; background-color:#5AC4B4;"><td style='padding:10px; color:white'>Social<span id='socialnumber'>()</span></td></thead><tr><td></td></tr></table></div></div>
-<div style='width:100%; height:10px;'></div>
-<div style='width:100%; height:50px;'><table style="width:70%; height:90%; margin:auto;"><tr style=""><td style="width:33%; padding:4px;"><button style="width:100%; padding:5px; background:none; border:1px solid #5AC4B4; border-radius:4px; color:#5AC4B4; font-size:120%;">Mark All as Read</button></td><td style="width:33%; padding:4px;"><button style="width:100%; padding:5px; background:none; border:1px solid #5AC4B4; border-radius:4px; color:#5AC4B4; font-size:120%;">Archive All</button></td><td style="width:33%; padding:4px;"><button style="width:100%; padding:5px; background:none; border:1px solid #5AC4B4; border-radius:4px; color:#5AC4B4; font-size:120%;">Delete All</button></td></tr></table></div>
-<div style='width:100%; height:100px;'></div>
+<div style='width:100%;'><div style="width:75%; height:90%; margin:auto; box-shadow:0 1vmin 2vmin 0 rgba(0,0,0,0.15);">
+<table style="width:100%; " id='socialtable'><thead style="width:100%; background-color:#5AC4B4; padding:0;"><td style='padding:10px; color:white'>Social<span id='socialnumber'> ()</span></td></thead><tr><td></td></tr></table></div></div>
+<div style='width:100%; height:5px;'></div>
+<div style='width:100%; height:80px;'><div style="display:table; margin:auto; height:100%; width:75%; background-color:white; box-shadow:0 1vmin 2vmin 0 rgba(0,0,0,0.15);"><table style="width:100%; height:100%; margin:auto;"><tr style=""><td style="width:33%; padding:4px; "><button style="width:100%; height:100%; padding:5px; background:none; border:none; color:#5AC4B4; font-size:120%;">Mark All as Read</button></td><td style="width:33%; padding:4px; "><button style="width:100%; padding:5px; background:none; border:none; color:#5AC4B4; font-size:120%;">Archive All</button></td><td style="width:33%; padding:4px; "><button style="width:100%; padding:5px; background:none; border:none; color:#5AC4B4; font-size:120%;">Delete All</button></td></tr></table></div></div>
+<div style='width:100%; height:20px;'></div>
 <div style='width:100%; height:10px;' class='footer'>
-	<div style="width:70%; height:90%; margin:auto;">
+	<div style="display:table; width:75%; height:90%; margin:auto; text-align:center;">
+	<a href="">Unsubscribe</a> | <a href=""> Manage email subscriptions</a> | <a href="">Privacy Policy</a> | <a href="">Support</a><br />
+	&copy; 2016, Planck Inc.
 	</div>
 </div>
 </body>
