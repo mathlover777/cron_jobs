@@ -537,13 +537,13 @@ def get_sender_string(email_id, participants):
 def create_html_digest(email_id, displayname, clutterthreads, socialthreads):
 	htmltemplatetext = open("html_templates/dailydigest.html").read()
 	soup = BeautifulSoup(htmltemplatetext)
-	soup = create_html_digest_for_label(email_id, clutterthreads, 'readlater', soup)
-	soup = create_html_digest_for_label(email_id, socialthreads, 'social', soup)
+	soup, c1 = create_html_digest_for_label(email_id, clutterthreads, 'readlater', soup)
+	soup, c2 = create_html_digest_for_label(email_id, socialthreads, 'social', soup)
 
 	displaynametag = soup.find('span', {'id':'username'})
 	displaynametag.contents[0].replaceWith(" "+displayname)
 
-	return str(soup)
+	return str(soup), c1+c2
 
 def create_html_digest_for_label(email_id, threads, label, soup):
 	
@@ -559,10 +559,10 @@ def create_html_digest_for_label(email_id, threads, label, soup):
 		outline = thread['snippet']
 		sender = get_sender_string(email_id, thread['participants'])
 
-		sendertag = threadtag.find('td',{'id':'sender'})
+		sendertag = threadtag.find('span',{'id':'sender'})
 		sendertag.contents[0].replaceWith(sender)
 
-		subjecttag = threadtag.find('td',{'id':'subject'})
+		subjecttag = threadtag.find('span',{'id':'subject'})
 		subjecttag.contents[0].replaceWith(subject)		
 
 		outlinetag = threadtag.find('td',{'id':'outline'})
@@ -575,7 +575,7 @@ def create_html_digest_for_label(email_id, threads, label, soup):
 		labelcounttag = soup.find('span', {'id':label+'number'})
 		labelcounttag.contents[0].replaceWith(" ("+str(count)+")")
 
-	return soup		
+	return soup, count		
 
 def get_mails_by_time_range(old_time, now_time, ns, label):
 	recent_threads = ns.threads.where(**{'last_message_after':old_time,'last_message_before' :now_time, 'in':label})
@@ -583,11 +583,11 @@ def get_mails_by_time_range(old_time, now_time, ns, label):
 
 def send_daily_digest(email_id, token, use_psync, digest_client):
 	##highest priority
-	old_time = token_store.get_last_digest_time_stamp(email_id)
-	now_time = token_store.set_last_digest_time_stamp(email_id,0)
-	# old_time = 1463993731
-	# now_time = 1464065731
-	# print old_time, now_time
+	# old_time = token_store.get_last_digest_time_stamp(email_id)
+	# now_time = token_store.set_last_digest_time_stamp(email_id,0)
+	old_time = 1463993731
+	now_time = 1464065731
+	print old_time, now_time
 	
 	ns = get_nylas_client_(token, use_psync)
 	cluttermails = get_mails_by_time_range(old_time, now_time, ns, "Read Later")
@@ -599,12 +599,12 @@ def send_daily_digest(email_id, token, use_psync, digest_client):
 		displayname = email_id
 	# print 'D',displayname
 
-	digestbody = create_html_digest(email_id, displayname, cluttermails, socialmails)
+	digestbody, count = create_html_digest(email_id, displayname, cluttermails, socialmails)
 	# print 'D',digestbody[:10]
 	digest_draft = digest_client.drafts.create()
 
 	digest_draft.to =  [{'email':email_id}]
-	digest_draft.subject = '[Planck Digest] Messages for you to review'
+	digest_draft.subject = '[Planck Digest] '+str(count)+' messages for you to review'
 	digest_draft.body = digestbody
 	# raw_input("send?")
 	digest_draft.send()
