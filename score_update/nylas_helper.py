@@ -633,7 +633,6 @@ def count_contact_wise_mails(email_id, token, use_psync):
 	old_time = token_store.get_last_mail_count_timestamp(email_id)
 	now_time = int(time.time())
 	print old_time, now_time
-	epoch = 631152000
 	from collections import defaultdict
 	count = defaultdict(int)
 	# if old_time == epoch:

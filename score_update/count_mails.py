@@ -17,8 +17,8 @@ def count_contact_wise_mails(email_id):
 	nylas_helper.count_contact_wise_mails(email_id, token, use_psync)
 
 def count_contact_wise_mails_for_all_users():
-	# user_list = token_store.get_email_prio_users()
-	user_list = ['kumar.sachin52@gmail.com']
+	user_list = token_store.get_email_prio_users()
+	# user_list = ['kumar.sachin52@gmail.com']
 	# print user_list
 	for email_id in user_list:
 		try:
