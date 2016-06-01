@@ -508,10 +508,13 @@ def archive_old_blacklist_mails(email_id, token):
 
 	for black_email in blacklist:
 		for message in ns.messages.where(**{'from':black_email}):
-			if(label_flag):
-				message.update_labels([blacklist_id])
-			else:
-				message.update_folder(blacklist_id)
+			try:
+				if(label_flag):
+					message.update_labels([blacklist_id])
+				else:
+					message.update_folder(blacklist_id)
+			except Exception as e:
+				print 'Could not update label for '+blacklist_id+'. Must be in "sent". Skipping'
 
 		token_store.remove_from_new_blacklist(email_id, black_email)
 
@@ -655,12 +658,13 @@ def count_contact_wise_mails(email_id, token, use_psync):
 	else:
 		# raw_input('next time '+email_id)
 		use_label = use_labels(ns)
-		recent_messages = ns.messages.where(**{'last_message_after':old_time,'last_message_before' :now_time})
+		recent_messages = ns.messages.where(**{'last_message_after':old_time,'last_message_before' :now_time, 'in':'Read Later'})
 		for message in recent_messages:
 			if not is_blacklisted(message, use_label):
 				for contact in message['from']:
 					if contact['email'] != "":
 						count[contact['email']] += 1
+
 	print 'counts done'
 	# print count
 	if len(count) > 0:
