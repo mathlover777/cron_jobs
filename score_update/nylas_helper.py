@@ -514,7 +514,8 @@ def archive_old_blacklist_mails(email_id, token):
 				else:
 					message.update_folder(blacklist_id)
 			except Exception as e:
-				print 'Could not update label for '+blacklist_id+'. Must be in "sent". Skipping'
+				pass
+				# print 'Could not update label for '+black_email+'. Must be in "sent". Skipping'
 
 		token_store.remove_from_new_blacklist(email_id, black_email)
 
@@ -635,35 +636,35 @@ def count_contact_wise_mails(email_id, token, use_psync):
 	epoch = 631152000
 	from collections import defaultdict
 	count = defaultdict(int)
-	if old_time == epoch:
-		# raw_input('first time '+email_id)
-		print "First time of",email_id
-		import requests
-		contacts = ns.contacts
-		cc = 0
-		for contact in ns.contacts:
-			url = nylas_url
-			if use_psync:
-				url = psync_url
-			if contact['email'] is not None:
-				r = requests.get(url+"/messages?from="+contact['email']+"&view=count", auth=(token, ""))
-				result = r.json()
-				if result.has_key('count'):
-					count[contact['email']] = result['count']
-					cc+=1
-			if cc%100==0:
-				print cc
+	# if old_time == epoch:
+	# 	# raw_input('first time '+email_id)
+	# 	print "First time of",email_id
+	# 	import requests
+	# 	contacts = ns.contacts
+	# 	cc = 0
+	# 	for contact in ns.contacts:
+	# 		url = nylas_url
+	# 		if use_psync:
+	# 			url = psync_url
+	# 		if contact['email'] is not None:
+	# 			r = requests.get(url+"/messages?from="+contact['email']+"&in=Read+Later&view=count", auth=(token, ""))
+	# 			result = r.json()
+	# 			if result.has_key('count'):
+	# 				count[contact['email']] = result['count']
+	# 				cc+=1
+	# 		if cc%100==0:
+	# 			print cc
 
 
-	else:
+	# else:
 		# raw_input('next time '+email_id)
-		use_label = use_labels(ns)
-		recent_messages = ns.messages.where(**{'last_message_after':old_time,'last_message_before' :now_time, 'in':'Read Later'})
-		for message in recent_messages:
-			if not is_blacklisted(message, use_label):
-				for contact in message['from']:
-					if contact['email'] != "":
-						count[contact['email']] += 1
+	use_label = use_labels(ns)
+	recent_messages = ns.messages.where(**{'last_message_after':old_time,'last_message_before' :now_time, 'in':'Read Later'})
+	for message in recent_messages:
+		if not is_blacklisted(message, use_label):
+			for contact in message['from']:
+				if contact['email'] != "":
+					count[contact['email']] += 1
 
 	print 'counts done'
 	# print count
