@@ -545,7 +545,8 @@ def create_html_digest(email_id, displayname, clutterthreads, socialthreads):
 	soup, c2 = create_html_digest_for_label(email_id, socialthreads, 'social', soup)
 
 	displaynametag = soup.find('span', {'id':'username'})
-	displaynametag.contents[0].replaceWith(" "+displayname)
+	if displaynametag is not None:
+		displaynametag.contents[0].replaceWith(" "+displayname)
 
 	return str(soup), c1+c2
 
@@ -563,21 +564,25 @@ def create_html_digest_for_label(email_id, threads, label, soup):
 		outline = thread['snippet']
 		sender = get_sender_string(email_id, thread['participants'])
 
-		sendertag = threadtag.find('span',{'id':'sender'})
-		sendertag.contents[0].replaceWith(sender)
+		sendertag = threadtag.find('span',{'id':'thsender'})
+		if sendertag is not None:
+			sendertag.contents[0].replaceWith(sender)
 
-		subjecttag = threadtag.find('span',{'id':'subject'})
-		subjecttag.contents[0].replaceWith(subject)		
+		subjecttag = threadtag.find('span',{'id':'thsubject'})
+		if subjecttag is not None:
+			subjecttag.contents[0].replaceWith(subject)		
 
-		outlinetag = threadtag.find('td',{'id':'outline'})
-		outlinetag.contents[0].replaceWith(outline)
+		outlinetag = threadtag.find('td',{'id':'thoutline'})
+		if outlinetag is not None:
+			outlinetag.contents[0].replaceWith(outline)
 
 		threadtable.append(threadtag)
 		count += 1
 
 	if count > 0:
 		labelcounttag = soup.find('span', {'id':label+'number'})
-		labelcounttag.contents[0].replaceWith(" ("+str(count)+")")
+		if labelcounttag is not None:
+			labelcounttag.contents[0].replaceWith(" ("+str(count)+")")
 
 	return soup, count		
 
@@ -591,7 +596,7 @@ def send_daily_digest(email_id, token, use_psync, digest_client):
 	now_time = token_store.set_last_digest_time_stamp(email_id,0)
 	# old_time = 1463993731
 	# now_time = 1464065731
-	# print old_time, now_time
+	print old_time, now_time
 	
 	ns = get_nylas_client_(token, use_psync)
 	cluttermails = get_mails_by_time_range(old_time, now_time, ns, "Read Later")
