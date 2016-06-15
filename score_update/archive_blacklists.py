@@ -22,14 +22,14 @@ def archive_blacklist_for_all_users():
 	user_list = ['pavel@plancklabs.com']
 	print user_list
 	for email_id in user_list:
-		# try:
+		try:
 			archive_blacklisted_mails(email_id)
-		# except Exception as e:
-		# 	print 'blacklist background process crashed for ' + email_id + ' Exception : {' + str(e) + '}'
+		except Exception as e:
+			print 'blacklist background process crashed for ' + email_id + ' Exception : {' + str(e) + '}'
 	return
 while True:
-	# try:
+	try:
 		archive_blacklist_for_all_users()
-	# except Exception as e:
-		# print 'blacklist background process crashed' + ' Exception : {' + str(e) + '}'
-	# time.sleep(60)
+	except Exception as e:
+		print 'blacklist background process crashed' + ' Exception : {' + str(e) + '}'
+	time.sleep(60)
