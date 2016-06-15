@@ -489,14 +489,14 @@ def is_object_important(delta_object, blacklist, old_time, email_id, white_list,
 
 ####Add to Blacklist triggers this####
 
-def archive_old_blacklist_mails(email_id, token):
+def archive_old_blacklist_mails(email_id, token, use_psync):
 	blacklist = token_store.get_new_blacklist(email_id)
 	if use_psync:
+		print token
 		client = nylas.APIClient(PLANCK_APP_ID, PLANCK_APP_SECRET, token, api_server=psync_url)
 	else:
 		client = nylas.APIClient(APP_ID, APP_SECRET, token)
 	ns = client
-	
 	label_flag = use_labels(ns)
 	if(label_flag):
 		blacklist_id = get_id(ns, 'Black Hole')
