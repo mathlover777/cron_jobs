@@ -383,3 +383,16 @@ def update_contact_mail_counts(email_id, contacts, counts):
 	if(response['success'] != 'true'):
 		print 'unable to update contact count ',email_id
 		print response
+
+def update_daily_digest_threads(email_id, thread_ids):
+	if len(thread_ids) <= 0:
+		return
+	threadstring = ";".join(thread_ids)
+	payload = {'email_id':email_id, 'digest_threads':threadstring}
+	url = base_url+'/server/update_daily_digest_threads'
+	
+	r = requests.post(url, data=payload)
+	response = r.json()
+
+	if response['success'] != 'true':
+		raise ValueError("Could not update digest threads on the server")

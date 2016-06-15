@@ -9,6 +9,8 @@ import re
 
 # APP_ID = 'cow3ntxewcbvdvtulazbm2fwv'
 # APP_SECRET = '56m1p8lujvmxpf9w58vdrv8ed'
+prioritizer_url = 'http://planckapi-prioritizer.us-west-1.elasticbeanstalk.com'
+
 use_psync = False
 
 PLANCK_APP_ID = '83fs5bk9kzm5pz3sq2gacsg2d'
@@ -541,8 +543,23 @@ def get_sender_string(email_id, participants):
 def create_html_digest(email_id, displayname, clutterthreads, socialthreads):
 	htmltemplatetext = open("html_templates/dailydigest.html").read()
 	soup = BeautifulSoup(htmltemplatetext)
-	soup, c1 = create_html_digest_for_label(email_id, clutterthreads, 'readlater', soup)
-	soup, c2 = create_html_digest_for_label(email_id, socialthreads, 'social', soup)
+	soup, c1, tids1 = create_html_digest_for_label(email_id, clutterthreads, 'readlater', soup)
+	soup, c2, tids2 = create_html_digest_for_label(email_id, socialthreads, 'social', soup)
+
+	maar = soup.findAll('a',{'class':'maar'})
+	print 'maas', maar
+	for i in range(len(maar)):
+		maar[i]['href'] = prioritizer_url + "/daily_digest/mark_all_as_read?email="+email_id
+
+	archall = soup.findAll('a',{'class':'archall'})
+	for i in range(len(archall)):
+		archall[i]['href'] = prioritizer_url + "/daily_digest/archive_all?email="+email_id
+
+	delall = soup.findAll('a',{'class':'delall'})
+	for i in range(len(delall)):
+		delall[i]['href'] = prioritizer_url + "/daily_digest/delete_all?email="+email_id	
+
+	token_store.update_daily_digest_threads(email_id, tids1+tids2)
 
 	displaynametag = soup.find('span', {'id':'username'})
 	if displaynametag is not None:
@@ -555,6 +572,7 @@ def create_html_digest_for_label(email_id, threads, label, soup):
 	threadtable = soup.find('table',{'id':label+'table'})
 	threadentrytemplate = open("html_templates/thread.html").read()
 	count = 0
+	thread_ids = []
 	for thread in threads:
 		# print 'thread '+label, count
 		threadsoup = BeautifulSoup(threadentrytemplate)
@@ -562,6 +580,8 @@ def create_html_digest_for_label(email_id, threads, label, soup):
 
 		subject = thread['subject']
 		outline = thread['snippet']
+		thread_ids.append(thread['id'])
+
 		sender = get_sender_string(email_id, thread['participants'])
 
 		sendertag = threadtag.find('span',{'id':'thsender'})
@@ -572,9 +592,21 @@ def create_html_digest_for_label(email_id, threads, label, soup):
 		if subjecttag is not None:
 			subjecttag.contents[0].replaceWith(subject)		
 
-		outlinetag = threadtag.find('td',{'id':'thoutline'})
+		outlinetag = threadtag.find('div',{'id':'thoutline'})
 		if outlinetag is not None:
 			outlinetag.contents[0].replaceWith(outline)
+
+		inboxonce = threadtag.find('a',{'class':'inboxonce'})
+		if inboxonce is not None:
+			inboxonce['href']=prioritizer_url+'/daily_digest/inbox_once?email='+email_id+"&id="+thread['id']
+
+		inboxalways = threadtag.find('a',{'class':'inboxalways'})
+		if inboxalways is not None:
+			inboxalways['href']=prioritizer_url+'/daily_digest/inbox_always?email='+email_id+"&id="+thread['id']
+
+		unsubscribe = threadtag.find('a',{'class':'unsubscribe'})
+		if unsubscribe is not None:
+			unsubscribe['href']=prioritizer_url+'/daily_digest/unsubscribe?email='+email_id+"&id="+thread['id']
 
 		threadtable.append(threadtag)
 		count += 1
@@ -584,7 +616,7 @@ def create_html_digest_for_label(email_id, threads, label, soup):
 		if labelcounttag is not None:
 			labelcounttag.contents[0].replaceWith(" ("+str(count)+")")
 
-	return soup, count		
+	return soup, count, thread_ids		
 
 def get_mails_by_time_range(old_time, now_time, ns, label):
 	recent_threads = ns.threads.where(**{'last_message_after':old_time,'last_message_before' :now_time, 'in':label})
@@ -592,10 +624,10 @@ def get_mails_by_time_range(old_time, now_time, ns, label):
 
 def send_daily_digest(email_id, token, use_psync, digest_client):
 	##highest priority
-	old_time = token_store.get_last_digest_time_stamp(email_id)
-	now_time = token_store.set_last_digest_time_stamp(email_id,0)
-	# old_time = 1463993731
-	# now_time = 1464065731
+	# old_time = token_store.get_last_digest_time_stamp(email_id)
+	# now_time = token_store.set_last_digest_time_stamp(email_id,0)
+	old_time = 1463993731
+	now_time = 1464065731
 	print old_time, now_time
 	
 	ns = get_nylas_client_(token, use_psync)
@@ -609,15 +641,18 @@ def send_daily_digest(email_id, token, use_psync, digest_client):
 	# print 'D',displayname
 
 	digestbody, count = create_html_digest(email_id, displayname, cluttermails, socialmails)
-	# print 'D',digestbody[:10]
-	digest_draft = digest_client.drafts.create()
+	f = open("newhtml.html","w")
+	f.write(digestbody)
+	f.close()
+	# # print 'D',digestbody[:10]
+	# digest_draft = digest_client.drafts.create()
 
-	digest_draft.to =  [{'email':email_id}]
-	digest_draft.subject = '[Planck Digest] '+str(count)+' messages for you to review'
-	digest_draft.body = digestbody
-	# raw_input("send?")
-	digest_draft.send()
-	# print "sent"
+	# digest_draft.to =  [{'email':email_id}]
+	# digest_draft.subject = '[Planck Digest] '+str(count)+' messages for you to review'
+	# digest_draft.body = digestbody
+	# # raw_input("send?")
+	# digest_draft.send()
+	print "sent"
 
 ###Counting mails from contacts###
 
