@@ -20,7 +20,7 @@ nylas_url = 'https://api.nylas.com'
 APP_ID = '5girg6tjmjuenujbsg0lnatlq'
 APP_SECRET = '8fokx1yoht10ypwdgev3rqqlp'
 
-digest_client_email = 'eva@plancklabs.com'
+digest_client_email = 'message-digest@plancklabs.com'
 planck_mails = set([digest_client_email])
 
 def set_psync(use_sync):
