@@ -9,7 +9,7 @@ source_2 = "nylas"
 use_psync = True
 
 digest_sync = False
-digest_client_email = 'eva@plancklabs.com'
+digest_client_email = 'message-digest@plancklabs.com'
 
 def send_daily_digest(email_id, digestclient):
 	token = token_store.get_token(email_id, source)

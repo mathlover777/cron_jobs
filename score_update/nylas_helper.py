@@ -643,7 +643,7 @@ def send_daily_digest(email_id, token, use_psync, digest_client):
 	digest_draft = digest_client.drafts.create()
 
 	digest_draft.to =  [{'email':email_id}]
-	digest_draft.subject = '[Planck Digest] '+str(count)+' messages for you to review'
+	digest_draft.subject = str(count)+' messages for you to review'
 	digest_draft.body = digestbody
 	# raw_input("send?")
 	digest_draft.send()
