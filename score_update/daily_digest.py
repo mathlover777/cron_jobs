@@ -28,8 +28,8 @@ def send_daily_digest_to_all_users(nowtime):
 	
 	digestclient = nylas_helper.get_nylas_client_(digest_token, digest_psync)
 
-	# user_list = token_store.get_email_prio_users()
-	user_list = ['kumar.sachin52@gmail.com', 'rajesh.x.kumar@gmail.com']
+	user_list = token_store.get_email_prio_users()
+	# user_list = ['kumar.sachin52@gmail.com', 'rajesh.x.kumar@gmail.com']
 	# user_list = ['sachinkumar1911@yahoo.com']
 	# print user_list
 	digest_times = token_store.get_daily_digest_time(user_list)
