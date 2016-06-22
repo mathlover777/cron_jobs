@@ -306,9 +306,12 @@ def has_html_content(ns, thread, threshold=0.2):
 		messages.append(len(m['body']))
 		clean_messages.append(len(get_clean_text(m['body'])))
 
-	f_html = 1.0*sum(clean_messages)/sum(messages)
+	if sum(messages) > 0:
+		f_html = 1.0*sum(clean_messages)/sum(messages)
 
-	if f_html < threshold:
+		if f_html < threshold:
+			return True
+	else:
 		return True
 	# cleantext = get_clean_text()
 	return False
