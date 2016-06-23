@@ -29,6 +29,11 @@ def get_email_prio_users():
 		return []
 	return response['prio_user_list']
 
+def remove_user_from_prio(email_id):
+	payload = {'email_id':email_id}
+	url = base_url + '/server/remove_user_to_priotity_list'
+	r = requests.post(url,data = payload)
+
 def update_contact_score(email_id,contact_score_json):
 	# str_score = {}
 	# for email in contact_score_json:

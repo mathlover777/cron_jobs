@@ -1,6 +1,7 @@
 import nylas_helper
 import token_store
 import time
+import nylas
 
 source = "planck"
 source_2 = "nylas"
@@ -18,8 +19,9 @@ def tag_new_mails(email_id,white_list):
 	return
 
 def tag_new_mails_for_all_users():
+
 	user_list = token_store.get_email_prio_users()
-	# user_list = ['sachinkumar1911@yahoo.com']
+	# user_list = ['rohelinekonn12@gmail.com']
 	white_list = token_store.get_white_list()
 	# print white_list
 	# print user_list
@@ -27,7 +29,15 @@ def tag_new_mails_for_all_users():
 		try:
 			tag_new_mails(email_id,white_list)
 		except Exception as e:
-			print 'tagger crashed for ' + email_id + ' Exception : {' + str(e) + '}'
+			try:
+				if type(e) == nylas.client.errors.NotFoundError:
+					if e.as_dict()['message'] == 'Account deleted':
+						token_store.remove_user_from_prio(email_id)
+						print "Removed "+email_id+". Showed 'Account deleted' error."
+				else:
+					print 'tagger crashed for ' + email_id + ' Exception : {' + str(e) + '}'
+			except Exception as e2:
+				print 'tagger deleter crashed for ' + email_id + ' Exception : {' + str(e2) + '}'
 	return
 while True:
 	try:
