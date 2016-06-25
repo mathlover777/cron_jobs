@@ -81,8 +81,8 @@ while True:
 		tzobj = pytz.timezone("UTC")
 		nowtime = tzobj.localize(datetime.datetime.utcnow())
 		print nowtime
-		# send_daily_digest_to_all_users(nowtime)
-		testing_digest(nowtime)
+		send_daily_digest_to_all_users(nowtime)
+		# testing_digest(nowtime)
 		time.sleep(1800)
 	except Exception as e:
 		print 'daily digest crashed' + ' Exception : {' + str(e) + '}'
