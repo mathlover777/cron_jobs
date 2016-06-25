@@ -17,7 +17,7 @@ def send_daily_digest(email_id, digestclient):
 		token = token_store.get_token(email_id, source_2)
 		use_psync = False
 	# print use_psync, token
-	nylas_helper.send_daily_digest(email_id, token, use_psync, digestclient)
+	nylas_helper.send_daily_digest_test(email_id, token, use_psync, digestclient)
 
 def send_daily_digest_to_all_users(nowtime):
 	digest_psync = True
@@ -55,13 +55,34 @@ def send_daily_digest_to_all_users(nowtime):
 		except Exception as e:
 			print 'Daily digest crashed {' + str(e) + '}'
 
+def testing_digest(nowtime):
+	digest_psync = True
+	digest_token = token_store.get_token(digest_client_email, source)
+	if(digest_token == ""):
+		digest_token = token_store.get_token(digest_client_email, source_2)
+		digest_psync = False
+	
+	digestclient = nylas_helper.get_nylas_client_(digest_token, digest_psync)
+
+	# user_list = token_store.get_email_prio_users()
+	user_list = ['kumar.sachin52@gmail.com']
+	for i in range(len(user_list)):
+		try:
+			user = user_list[i]
+			print "Preparing to send daily digest to",user
+			send_daily_digest(user, digestclient)
+			print 'Sent the digest to',user
+
+		except Exception as e:
+			print 'Daily digest crashed {' + str(e) + '}'
 
 while True:
 	try:
 		tzobj = pytz.timezone("UTC")
 		nowtime = tzobj.localize(datetime.datetime.utcnow())
 		print nowtime
-		send_daily_digest_to_all_users(nowtime)
+		# send_daily_digest_to_all_users(nowtime)
+		testing_digest(nowtime)
 		time.sleep(1800)
 	except Exception as e:
 		print 'daily digest crashed' + ' Exception : {' + str(e) + '}'

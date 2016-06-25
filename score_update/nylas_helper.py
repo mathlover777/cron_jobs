@@ -560,7 +560,7 @@ def create_html_digest(email_id, displayname, clutterthreads, socialthreads):
 	for i in range(len(delall)):
 		delall[i]['href'] = prioritizer_url + "/daily_digest/delete_all?email="+email_id	
 
-	token_store.update_daily_digest_threads(email_id, tids1+tids2)
+	# token_store.update_daily_digest_threads(email_id, tids1+tids2)
 
 	displaynametag = soup.find('span', {'id':'username'})
 	if displaynametag is not None:
@@ -629,6 +629,32 @@ def send_daily_digest(email_id, token, use_psync, digest_client):
 	now_time = token_store.set_last_digest_time_stamp(email_id,0)
 	# old_time = 1463993731
 	# now_time = 1464065731
+	print old_time, now_time
+	
+	ns = get_nylas_client_(token, use_psync)
+	cluttermails = get_mails_by_time_range(old_time, now_time, ns, "Read Later")
+	socialmails = get_mails_by_time_range(old_time, now_time, ns, "Social")
+
+	accountinfo = ns.account
+	displayname = accountinfo['name']
+	if displayname == "":
+		displayname = email_id
+
+	digestbody, count = create_html_digest(email_id, displayname, cluttermails, socialmails)
+
+	if count > 0:
+		digest_draft = digest_client.drafts.create()
+		digest_draft.to =  [{'email':email_id}]
+		digest_draft.subject = str(count)+' message(s) for you to review'
+		digest_draft.body = digestbody
+		digest_draft.send()
+
+def send_daily_digest_test(email_id, token, use_psync, digest_client):
+	##highest priority
+	# old_time = token_store.get_last_digest_time_stamp(email_id)
+	# now_time = token_store.set_last_digest_time_stamp(email_id,0)
+	old_time = 1463990731
+	now_time = 1464065731
 	print old_time, now_time
 	
 	ns = get_nylas_client_(token, use_psync)
