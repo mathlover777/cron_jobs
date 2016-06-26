@@ -17,7 +17,7 @@ def send_daily_digest(email_id, digestclient):
 		token = token_store.get_token(email_id, source_2)
 		use_psync = False
 	# print use_psync, token
-	nylas_helper.send_daily_digest_test(email_id, token, use_psync, digestclient)
+	nylas_helper.send_daily_digest(email_id, token, use_psync, digestclient)
 
 def send_daily_digest_to_all_users(nowtime):
 	digest_psync = True

@@ -26,11 +26,11 @@ def send_reminder(email_id,thread,subject,auto_ask,msg_id):
 	
 
 	sender_id = "reminders@plancklabs.com"
-	sender_name = 'Janine'
+	sender_name = 'Planck Reminders'
 	participants = filter(lambda x:x['email'].lower() != email_id.lower(),thread['participants'])
 	unique_first_name_list = list(set([x['name'].split()[0] for x in participants]))
 
-	first_name_list = ','.join(unique_first_name_list)
+	first_name_list = ', '.join(unique_first_name_list)
 	
 	# send mail to sender
 	receiver_list = json.dumps([{'email':email_id,'name':email_id}])
