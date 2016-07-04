@@ -28,7 +28,7 @@ def set_psync(use_sync):
 
 ####Functions for Score update of users for prioritization####
 
-def get_msg_count_in_range(future_time_stamp,past_time_stamp,email,token,direction):
+def get_msg_count_in_range(future_time_stamp,past_time_stamp,email,token,direction, use_psync):
 	if use_psync:
 		client = nylas.APIClient(PLANCK_APP_ID, PLANCK_APP_SECRET, token, api_server=psync_url)
 	else:
@@ -53,7 +53,7 @@ def get_msg_count_in_range(future_time_stamp,past_time_stamp,email,token,directi
 		json.dump(sent_people_stat,fp = fp,indent = 4)
 	return sent_people_stat
 
-def get_thread_participant_score_with_tags(future_time_stamp,past_time_stamp,token,tag,self_email):
+def get_thread_participant_score_with_tags(future_time_stamp,past_time_stamp,token,tag,self_email, use_psync):
 	if use_psync:
 		client = nylas.APIClient(PLANCK_APP_ID, PLANCK_APP_SECRET, token, api_server=psync_url)
 	else:
@@ -87,7 +87,7 @@ def get_thread_participant_score_with_tags(future_time_stamp,past_time_stamp,tok
 	# print 'nexp_count : ',nexp_count
 	return people_stat
 
-def get_msg_score(email,token):
+def get_msg_score(email,token, use_psync):
 	# current_time_stamp = get_current_time_stamp()
 	upto_weeks = 4
 	# past_time_stamp = get_old_time_stamp(7)
@@ -105,11 +105,11 @@ def get_msg_score(email,token):
 		else:
 			future_time_stamp = helper.get_old_time_stamp(i*7)
 		past_time_stamp = helper.get_old_time_stamp((i+1) * 7)
-		sent_stat[i] = get_msg_count_in_range(future_time_stamp,past_time_stamp,email,token,'from')
+		sent_stat[i] = get_msg_count_in_range(future_time_stamp,past_time_stamp,email,token,'from', use_psync)
 		# print 'sent_stat'
-		receive_stat[i] = get_msg_count_in_range(future_time_stamp,past_time_stamp,email,token,'to')
+		receive_stat[i] = get_msg_count_in_range(future_time_stamp,past_time_stamp,email,token,'to', use_psync)
 		# print 'receive_stat'
-		unread_stat[i] = get_thread_participant_score_with_tags(future_time_stamp,past_time_stamp,token,'unread',email)
+		unread_stat[i] = get_thread_participant_score_with_tags(future_time_stamp,past_time_stamp,token,'unread',email, use_psync)
 		# print 'unread_stat'
 		# unseen_stat[i] = get_thread_participant_score_with_tags(future_time_stamp,past_time_stamp,token,'unseen',email)
 		# print 'unseen_stat'
@@ -177,10 +177,10 @@ def compute_primitive_score(email):
 
 	return score
 
-def get_recent_contact_score(email_id,token):
+def get_recent_contact_score(email_id,token, use_psync):
 	# print "get_recent_contact_score"
-	get_msg_score(email_id,token)
-	score_list = compute_primitive_score(email_id)
+	get_msg_score(email_id,token, use_psync)
+	score_list = compute_primitive_score(email_id, use_psync)
 	return score_list
 
 ####Functions for email prioritizer####

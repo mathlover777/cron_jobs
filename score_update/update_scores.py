@@ -11,8 +11,8 @@ def get_score_list_for_user(email_id):
 	if(token == ""):
 		token = token_store.get_token(email_id, source_2)
 		use_psync = False
-	nylas_helper.set_psync(use_psync)
-	score_list = nylas_helper.get_recent_contact_score(email_id,token)
+	# nylas_helper.set_psync(use_psync)
+	score_list = nylas_helper.get_recent_contact_score(email_id,token, use_psync)
 	return score_list
 
 
