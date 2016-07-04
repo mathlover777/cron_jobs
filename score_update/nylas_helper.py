@@ -140,7 +140,7 @@ def get_count_if_exist_else_zero(data,email):
 		return data[email]
 	return 0
 
-def compute_primitive_score(email):
+def compute_primitive_score(email, use_psync):
 	sent_stat = helper.load_json('sent_last.json')
 	receive_stat = helper.load_json('receive_last.json')
 	unread_stat = helper.load_json('unread_last.json')
