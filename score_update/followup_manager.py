@@ -5,9 +5,26 @@ import json
 import helper
 import time
 
+def send_snooze_reminder(email_id, thread):
+	sender_id = "reminders@plancklabs.com"
+	sender_name = "Planck Reminders"
+	participants = filter(lambda x:x['email'].lower() != email_id.lower(),thread['participants'])
+	name_list = [x['name'] for x in participants]
+
+	names_string = ', '.join(name_list)
+	
+	# send mail to sender
+	receiver_list = json.dumps([{'email':email_id}])
+	sender_subject = thread['subject']
+	sender_body = "Hi, you asked me to remind you of the mail which you snoozed with subject \""+sender_subject+"\". It has been moved back from FollowUps. Please take necessary action.<br /><br />Thank you,"
+	token_store.send_mail_to_users(sender_id,sender_name,receiver_list,sender_subject,sender_body,'')
+
 def manage_expired_threads(email_id,expired_thread_list):
 	token = token_store.get_token(email_id)
+	nylas_client = nylas_helper.get_nylas_client(token)
 	for thread_id in expired_thread_list:
+		thread_object = nylas_client.threads.find(thread_id)
+		send_snooze_reminder(email_id, thread_object)
 		token_store.remove_thread_from_followup(email_id,thread_id,token)
 	return
 
@@ -26,10 +43,10 @@ def run_followup_manager_for_user(email_id):
 def run_followup_manager_for_all_users():
 	user_list = token_store.get_email_prio_users()
 	# print user_list
-	# user_list = ['souravmathlover@gmail.com']
+	user_list = ['kumar.sachin52@gmail.com']
 	for email_id in user_list:
 		#print '***************************'
-		#print email_id
+		print email_id
 		try:
 			run_followup_manager_for_user(email_id)
 		except Exception as e:

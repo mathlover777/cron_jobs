@@ -182,6 +182,24 @@ def get_expired_threads_in_reminder_list(email_id,max_time):
 		return []
 	return response["thread_list"]
 
+def get_expired_snoozed_threads_in_reminder_list(email_id,max_time):
+	payload = {'email_id':email_id,'max_time':max_time, 'snooze':'1'}
+	
+	# print payload	
+
+	url = base_url + '/server/get_expired_threads_in_reminder_list'
+	r = requests.post(url,data = payload)
+	# print r
+	# print '******************'
+	# print r.text
+	# print '******************'
+	response = r.json()
+	# print response
+	if response['success'] != 'true':
+		print r.text
+		return []
+	return response["thread_list"]
+
 def remove_thread_from_reminder_list(email_id,thread_id):
 	payload = {'email_id':email_id,'thread_id':thread_id}
 	url = base_url + '/server/remove_thread_from_reminder_list'

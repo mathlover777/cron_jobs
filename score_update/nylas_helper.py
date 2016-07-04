@@ -339,7 +339,7 @@ def is_spam_thread(thread, label_flag):
 def overlap(a, b):
 	return len(list(set(a) & set(b)))
 
-def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, social_list=[]):
+def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, social_list=[], use_psync=False):
 	if use_psync:
 		client = nylas.APIClient(PLANCK_APP_ID, PLANCK_APP_SECRET, token, api_server=psync_url)
 	else:
@@ -447,7 +447,7 @@ def get_nylas_client_(token, psync_use):
 		client = nylas.APIClient(APP_ID, APP_SECRET, token)
 	return client
 
-def tag_recent_unread_mails(email_id,token,white_list, social_list=[]):
+def tag_recent_unread_mails(email_id,token,white_list, social_list=[], use_psync=False):
 	# this will retrieve the all unread threads
 	# now depending on the people involved in the thread other than the current
 	# it will check mails only on the last 60 mins
@@ -457,7 +457,7 @@ def tag_recent_unread_mails(email_id,token,white_list, social_list=[]):
 	# now_time = helper.get_current_time_stamp()
 	# print time.strftime("%D %H:%M", time.localtime(int(now_time)))
 
-	tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, social_list)
+	tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, social_list, use_psync)
 
 ####Used in Push Notification####
 
