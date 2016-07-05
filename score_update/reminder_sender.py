@@ -5,6 +5,9 @@ import json
 import helper
 import time
 
+source_1 = "planck"
+source_2 = "nylas"
+
 def is_thread_replied(email_id,thread,first_msg,nylas_client):
 	# print thread
 	message_id_list = thread["message_ids"]
@@ -31,25 +34,29 @@ def send_reminder(email_id,thread,subject,auto_ask,msg_id):
 	# send mail to sender
 	receiver_list = json.dumps([{'email':email_id}])
 	sender_subject = subject
-	sender_body = "Hi, you asked me to remind you, if no replies are received to the thread with subject \""+sender_subject+"\". Please take necessary action\n\nThank you,"
+	sender_body = "Hi, you asked me to remind you, if no replies are received to the thread with subject \""+sender_subject+"\". Please take necessary action<br /><br />Thank you,"
 	token_store.send_mail_to_users(sender_id,sender_name,receiver_list,sender_subject,sender_body,'')
-
+	print "sent mail to the sender"
 	# send mail to receivers if required
 	if(auto_ask == 1):
 		sender_name = email_id
 		sender_id = email_id
 		receiver_list = json.dumps(participants)
-		sender_subject = ''
+		sender_subject = sender_subject
 		sender_body = 'Hi, This is a gentle reminder that '+sender_name+' is waiting for your reply to the thread with subject "'+sender_subject+'". Please reply at your convenience.\n\nThank you,'
 		#TODO: reply to the same thread
-		token_store.send_mail_to_users(sender_id,sender_name,receiver_list,
-			sender_subject,sender_body,msg_id)
+		token_store.send_mail_to_users(sender_id,sender_name,receiver_list,sender_subject,sender_body,msg_id)
 		print "sent mail to all"
 	return
 
 def manage_expired_threads(email_id, expired_thread_list):
-	token = token_store.get_token(email_id)
-	nylas_client = nylas_helper.get_nylas_client(token)
+	psync = True
+	token = token_store.get_token(email_id, source_1)
+	if token == "":
+		token = token_store.get_token(email_id, source_2)
+		psync = False
+	nylas_client = nylas_helper.get_nylas_client_(token, psync)
+
 	for thread in expired_thread_list:
 		auto_ask = int(thread["auto_ask"])
 		first_msg = thread["first_msg"]
@@ -59,21 +66,20 @@ def manage_expired_threads(email_id, expired_thread_list):
 		thread_object = nylas_client.threads.find(thread_id)
 		# print thread_object
 
-
 		if(is_thread_replied(email_id,thread_object,first_msg,nylas_client)):
 			print "thread is replied"
 			token_store.remove_thread_from_reminder_list(email_id,thread_id)
 		else:
 			print "thread is not replied"
 			send_reminder(email_id,thread_object,subject,auto_ask,first_msg)
+			token_store.remove_thread_from_reminder_list(email_id, thread_id)
 	return
-
 
 def run_reminder_sender_for_user(email_id):
 	current_time_stamp = helper.get_current_time_stamp()
 	expired_thread_list = token_store.get_expired_threads_in_reminder_list(email_id,current_time_stamp)
 	
-	print expired_thread_list
+	# print expired_thread_list
 
 	if len(expired_thread_list) > 0:
 		print 'expired threads found'
@@ -87,10 +93,10 @@ def run_reminder_sender_for_user(email_id):
 def run_reminder_sender_for_all_users():
 	user_list = token_store.get_email_prio_users()
 	# print user_list
-	user_list = ['kumar.sachin52@gmail.com']
+	# user_list = ['kumar.sachin52@gmail.com']
 	for email_id in user_list:
-		print '***************************'
-		print email_id
+		# print '***************************'
+		# print email_id
 		try:
 			run_reminder_sender_for_user(email_id)
 		except Exception as e:

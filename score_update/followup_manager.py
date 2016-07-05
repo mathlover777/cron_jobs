@@ -5,6 +5,9 @@ import json
 import helper
 import time
 
+source_1 = "planck"
+source_2 = "nylas"
+
 def send_snooze_reminder(email_id, thread):
 	sender_id = "reminders@plancklabs.com"
 	sender_name = "Planck Reminders"
@@ -20,8 +23,15 @@ def send_snooze_reminder(email_id, thread):
 	token_store.send_mail_to_users(sender_id,sender_name,receiver_list,sender_subject,sender_body,'')
 
 def manage_expired_threads(email_id,expired_thread_list):
-	token = token_store.get_token(email_id)
-	nylas_client = nylas_helper.get_nylas_client(token)
+
+	psync = True
+	token = token_store.get_token(email_id, source_1)
+	if token == "":
+		token = token_store.get_token(email_id, source_2)
+		psync = False
+		
+	nylas_client = nylas_helper.get_nylas_client_(token, psync)
+
 	for thread_id in expired_thread_list:
 		thread_object = nylas_client.threads.find(thread_id)
 		send_snooze_reminder(email_id, thread_object)
@@ -43,14 +53,14 @@ def run_followup_manager_for_user(email_id):
 def run_followup_manager_for_all_users():
 	user_list = token_store.get_email_prio_users()
 	# print user_list
-	user_list = ['kumar.sachin52@gmail.com']
+	# user_list = ['kumar.sachin52@gmail.com']
 	for email_id in user_list:
 		#print '***************************'
-		print email_id
+		# print email_id
 		try:
 			run_followup_manager_for_user(email_id)
 		except Exception as e:
-			print "reminder sender crashed for " + email_id + "exp {" + str(e) + "}"
+			print "follow up manager crashed for " + email_id + "exp {" + str(e) + "}"
 	return
 
 

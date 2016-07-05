@@ -235,23 +235,24 @@ def add_thread_to_followup(email_id,thread_id,current_status,snooze_till,token):
 		'snooze_till':snooze_till,'token':token}
 	url = base_url + '/server/add_thread_to_followup'
 	r = requests.post(url,data = payload)
-	print r.text
+	# print r.text
 	response = r.json()
 	print response
 	if response['success'] != 'true':
-		print r.text
+		# print r.text
 		# print response
+		pass
 	return
 
 def get_expired_threads_from_followup(email_id,max_time):
 	payload = {'email_id':email_id,'max_time':max_time}
 	url = base_url + '/server/get_expired_threads_from_followup'
 	r = requests.post(url,data = payload)
-	print r.text
+	# print r.text
 	response = r.json()
-	print response
+	# print response
 	if response['success'] != 'true':
-		print r.text
+		# print r.text
 		# print response
 		return []
 	return response["expired_thread_list"]
