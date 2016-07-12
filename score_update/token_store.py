@@ -271,6 +271,17 @@ def remove_thread_from_followup(email_id,thread_id,token):
 	return True
 
 #uses prioritizer url
+def add_to_blacklist(email_id, blacklist_id):
+	payload = {'email_id':email_id,'blacklist_id':blacklist_id}
+	url = prioritizer_url + '/api/add_to_blacklist/'
+	r = requests.post(url,data = payload)
+	response = r.json()
+	# print response
+	if response['success'] != 'true':
+		raise ValueError("Could not add to the blacklist. "+response['msg'])
+
+
+#uses prioritizer url
 def get_new_blacklist(email_id):
 	payload = {'email_id':email_id}
 	url = prioritizer_url + '/api/get_new_blacklist/'

@@ -368,10 +368,8 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 		social_id = get_id(ns, 'Social')
 		if social_id is None:
 			social_id = add_label(ns, 'Social')
-		blacklist_id = get_id(ns, 'Black Hole')
-		if(blacklist_id is None):
-			blacklist_id = add_label(ns, 'Black Hole')
-
+		#as per new rules, mails from blacklisted email ids should be deleted.
+		blacklist_id = get_id(ns, 'Trash')
 		label_flag = True
 	else:
 		inbox_id = get_folder_id(ns, 'Inbox')
@@ -382,9 +380,13 @@ def tag_unread_mails_in_time_range(email_id,token,now_time,old_time,white_list, 
 		social_id = get_folder_id(ns, 'Social')
 		if social_id is None:
 			social_id = add_folder(ns, 'Social')
-		blacklist_id = get_folder_id(ns, 'Black Hole')
-		if(blacklist_id is None):
-			blacklist_id = add_folder(ns, 'Black Hole')
+
+		blacklist_id = get_folder_id(client, 'Trash')
+		if blacklist_id is None:
+			blacklist_id = get_folder_id(client, 'Deleted Items')
+			if blacklist_id is None:
+				blacklist_id = add_folder(client, 'Trash')
+				print 'Created Trash folder for',email_id
 
 		label_flag = False
 	
@@ -502,13 +504,14 @@ def archive_old_blacklist_mails(email_id, token, use_psync):
 	ns = client
 	label_flag = use_labels(ns)
 	if(label_flag):
-		blacklist_id = get_id(ns, 'Black Hole')
-		if(blacklist_id is None):
-			blacklist_id = add_label(ns, 'Black Hole')
+		#as per new rules, mails from blacklisted ids should be deleted
+		blacklist_id = get_id(ns, 'Trash')
 	else:
-		blacklist_id = get_folder_id(ns, 'Black Hole')
+		blacklist_id = get_folder_id(ns, 'Trash')
 		if(blacklist_id is None):
-			blacklist_id = add_folder(ns, 'Black Hole')
+			blacklist_id = get_folder_id(ns, 'Deleted Items')
+			if blacklist_id is None:
+				blacklist_id = add_folder(ns, 'Trash')
 
 	for black_email in blacklist:
 		for message in ns.messages.where(**{'from':black_email}):
@@ -522,6 +525,43 @@ def archive_old_blacklist_mails(email_id, token, use_psync):
 				# print 'Could not update label for '+black_email+'. Must be in "sent". Skipping'
 
 		token_store.remove_from_new_blacklist(email_id, black_email)
+
+
+##This function looks at the Black Hole folder and blacklists all the senders
+def blacklist_senders(email_id, token, use_psync):
+	blacklist = token_store.get_blacklist(email_id)
+	if use_psync:
+		print token
+		client = nylas.APIClient(PLANCK_APP_ID, PLANCK_APP_SECRET, token, api_server=psync_url)
+	else:
+		client = nylas.APIClient(APP_ID, APP_SECRET, token)
+	ns = client
+	label_flag = use_labels(ns)
+	if(label_flag):
+		#as per new rules, mails from blacklisted ids should be deleted
+		trash_id = get_id(ns, 'Trash')
+	else:
+		trash_id = get_folder_id(ns, 'Trash')
+		if(trash_id is None):
+			trash_id = get_folder_id(ns, 'Deleted Items')
+			if trash_id is None:
+				trash_id = add_folder(ns, 'Trash')
+
+	black_threads = ns.threads.where(**{'in':'Black Hole'})
+	black_senders = set()
+	for black_thread in black_threads:
+		if len(black_thread['message_ids']) > 0:
+			black_msg = ns.messages.find(black_thread['message_ids'][0])
+			for sender in black_msg['from']:
+				black_senders.add(sender['email'])
+		if label_flag:
+			black_thread.update_labels([trash_id])
+		else:
+			black_thread.update_folder(trash_id)
+
+	for sender in black_senders:
+		if sender not in blacklist:
+			token_store.add_to_blacklist(email_id, sender)
 
 ####Daily Digest Functions####
 
