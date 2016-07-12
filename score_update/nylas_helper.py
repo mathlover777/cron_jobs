@@ -526,6 +526,12 @@ def archive_old_blacklist_mails(email_id, token, use_psync):
 
 		token_store.remove_from_new_blacklist(email_id, black_email)
 
+##blacklist sender helper
+def has_sent_label(thread, sent_id):
+	for label in thread['_labels']:
+		if label['id'] == sent_id:
+			return True
+	return False
 
 ##This function looks at the Black Hole folder and blacklists all the senders
 def blacklist_senders(email_id, token, use_psync):
@@ -540,6 +546,8 @@ def blacklist_senders(email_id, token, use_psync):
 	if(label_flag):
 		#as per new rules, mails from blacklisted ids should be deleted
 		trash_id = get_id(ns, 'Trash')
+		sent_id = get_id(ns, 'Sent Mail')
+		print 'sent_id, trash_id', sent_id, trash_id
 	else:
 		trash_id = get_folder_id(ns, 'Trash')
 		if(trash_id is None):
@@ -550,12 +558,17 @@ def blacklist_senders(email_id, token, use_psync):
 	black_threads = ns.threads.where(**{'in':'Black Hole'})
 	black_senders = set()
 	for black_thread in black_threads:
+		print 'black_thread', black_thread['id']
 		if len(black_thread['message_ids']) > 0:
 			black_msg = ns.messages.find(black_thread['message_ids'][0])
 			for sender in black_msg['from']:
 				black_senders.add(sender['email'])
+
 		if label_flag:
-			black_thread.update_labels([trash_id])
+			updates = [trash_id]
+			if has_sent_label(black_thread, sent_id):
+				updates.append(sent_id)
+			black_thread.update_labels(updates)
 		else:
 			black_thread.update_folder(trash_id)
 
