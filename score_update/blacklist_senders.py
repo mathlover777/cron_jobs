@@ -1,6 +1,7 @@
 import nylas_helper
 import token_store
 import time
+import traceback
 
 source_2 = "nylas"
 source = "planck"
@@ -25,7 +26,7 @@ def run_blacklist_senders_for_all_users():
 		try:
 			blacklist_senders(email_id)
 		except Exception as e:
-			print 'blacklist senders background process crashed for ' + email_id + ' Exception : {' + str(e) + '}'
+			print 'blacklist senders background process crashed for ' + email_id + ' Exception : {' + traceback.format_exc() + '}'
 	return
 while True:
 	try:
