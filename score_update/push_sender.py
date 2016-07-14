@@ -3,6 +3,7 @@ import requests
 import nylas_helper
 import json
 import time
+import traceback
 
 def from_email_ids(email_id,single_delta_object):
 	object_type = single_delta_object["object"]
@@ -151,7 +152,7 @@ def run_push_for_all_users():
 		try:
 			run_push_for_user(email_id,white_list)
 		except Exception as e:
-			print "push sender crashed for " + email_id + "exp {" + str(e) + "}"
+			print "push sender crashed for " + email_id + "exp {" + traceback.format_exc() + "}"
 	return
 
 
