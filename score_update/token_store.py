@@ -277,8 +277,8 @@ def add_to_blacklist(email_id, blacklist_id):
 	r = requests.post(url,data = payload)
 	response = r.json()
 	# print response
-	if response['success'] != 'true':
-		raise ValueError("Could not add to the blacklist. "+response['msg'])
+	# if response['success'] != 'true':
+	# 	raise ValueError("Could not add to the blacklist.")
 
 
 #uses prioritizer url

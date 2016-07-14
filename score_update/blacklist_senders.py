@@ -18,9 +18,9 @@ def blacklist_senders(email_id):
 	return
 
 def run_blacklist_senders_for_all_users():
-	# user_list = token_store.get_email_prio_users()
-	user_list = ['kumar.sachin52@gmail.com']
-	print user_list
+	user_list = token_store.get_email_prio_users()
+	# user_list = ['kumar.sachin52@gmail.com']
+	# print user_list
 	for email_id in user_list:
 		try:
 			blacklist_senders(email_id)

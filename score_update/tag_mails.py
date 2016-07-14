@@ -2,6 +2,7 @@ import nylas_helper
 import token_store
 import time
 import nylas
+import traceback
 
 source = "planck"
 source_2 = "nylas"
@@ -35,9 +36,9 @@ def tag_new_mails_for_all_users():
 						token_store.remove_user_from_prio(email_id)
 						print "Removed "+email_id+". Showed 'Account deleted' error."
 				else:
-					print 'tagger crashed for ' + email_id + ' Exception : {' + str(e) + '}'
+					print 'tagger crashed for ' + email_id + ' Exception : {' + traceback.format_exc() + '}'
 			except Exception as e2:
-				print 'tagger deleter crashed for ' + email_id + ' Exception : {' + str(e2) + '}'
+				print 'tagger deleter crashed for ' + email_id + ' Exception : {' + traceback.format_exc() + '}'
 	return
 while True:
 	try:
